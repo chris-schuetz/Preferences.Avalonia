@@ -27,23 +27,33 @@ namespace Preferences.Avalonia.ViewModels;
 
 public class SectionViewModel : ReactiveObject, IDisposable
 {
-    private readonly PreferencesSection _model;
     private readonly ILocalizationService? _localizationService;
     private bool _isDisposed;
 
     public SectionViewModel(PreferencesSection model, ILocalizationService? localizationService = null)
     {
-        _model = model;
+        Model = model;
         _localizationService = localizationService;
         Entries = new ObservableCollection<EntryViewModel>(model.Entries.Select(e =>
             new EntryViewModel(e, localizationService)));
-        
-        if (_localizationService != null)
-        {
-            _localizationService.LocaleChanged += OnLocaleChanged;
-        }
+
+        if (_localizationService != null) _localizationService.LocaleChanged += OnLocaleChanged;
     }
-    
+
+    public string Title => _localizationService != null
+        ? _localizationService.GetLocalizedString(Model.Name)
+        : Model.Name;
+
+    public ObservableCollection<EntryViewModel> Entries { get; }
+
+    public PreferencesSection Model { get; }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
     ~SectionViewModel()
     {
         Dispose(false);
@@ -54,32 +64,13 @@ public class SectionViewModel : ReactiveObject, IDisposable
         this.RaisePropertyChanged(nameof(Title));
     }
 
-    public string Title => _localizationService != null
-        ? _localizationService.GetLocalizedString(_model.Name)
-        : _model.Name;
-
-    public ObservableCollection<EntryViewModel> Entries { get; }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-    
     private void Dispose(bool disposing)
     {
-        if (_isDisposed)
-        {
-            return;
-        }
+        if (_isDisposed) return;
 
         if (disposing)
-        {
             if (_localizationService != null)
-            {
                 _localizationService.LocaleChanged -= OnLocaleChanged;
-            }
-        }
 
         _isDisposed = true;
     }

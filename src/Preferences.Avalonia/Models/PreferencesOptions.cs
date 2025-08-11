@@ -23,5 +23,6 @@ namespace Preferences.Avalonia.Models;
 public class PreferencesOptions
 {
     public const string Preferences = "Preferences";
+
     public List<PreferencesSection> Sections { get; set; } = [];
 }
