@@ -25,14 +25,28 @@ using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;
 
+/// <summary>
+/// Represents a view model for a preferences section that provides reactive UI binding
+/// and localization support for preference entries.
+/// </summary>
+/// <remarks>
+/// This view model wraps a <see cref="PreferencesSection"/> model and exposes its properties
+/// in a way that's suitable for UI binding in Avalonia applications. It implements
+/// <see cref="IDisposable"/> to properly clean up event subscriptions and follows the
+/// ReactiveUI pattern for property change notifications.
+/// 
+/// The view model automatically handles localization updates by subscribing to locale
+/// change events and refreshing the Title property when the locale changes.
+/// </remarks>
 public class SectionViewModel : ReactiveObject, IDisposable
 {
+    private readonly PreferencesSection _model;
     private readonly ILocalizationService? _localizationService;
     private bool _isDisposed;
 
     public SectionViewModel(PreferencesSection model, ILocalizationService? localizationService = null)
     {
-        Model = model;
+        _model = model;
         _localizationService = localizationService;
         Entries = new ObservableCollection<EntryViewModel>(model.Entries.Select(e =>
             new EntryViewModel(e, localizationService)));
@@ -41,12 +55,12 @@ public class SectionViewModel : ReactiveObject, IDisposable
     }
 
     public string Title => _localizationService != null
-        ? _localizationService.GetLocalizedString(Model.Name)
-        : Model.Name;
+        ? _localizationService.GetLocalizedString(_model.Name)
+        : _model.Name;
+    
+    public int Order => _model.Order;
 
     public ObservableCollection<EntryViewModel> Entries { get; }
-
-    public PreferencesSection Model { get; }
 
     public void Dispose()
     {

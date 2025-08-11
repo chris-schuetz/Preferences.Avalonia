@@ -20,6 +20,21 @@
 
 namespace Preferences.Avalonia.Models;
 
+/// <summary>
+/// Represents the root container for all application preferences organized in sections.
+/// </summary>
+/// <remarks>
+/// This class serves as the top-level model for the preferences system, containing a collection
+/// of <see cref="PreferencesSection"/> objects that group related preferences together.
+/// 
+/// PreferencesOptions is typically used when initializing the preferences UI system and provides
+/// the complete preferences hierarchy for the application. It defines a constant string identifier
+/// for preferences configuration.
+/// 
+/// The class follows a simple structure where all preference sections are stored in a flat list,
+/// with each section containing its own entries. This design allows for flexible organization
+/// of application settings while maintaining a consistent UI representation.
+/// </remarks>
 public class PreferencesOptions
 {
     public const string Preferences = "Preferences";

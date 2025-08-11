@@ -35,4 +35,7 @@
     <data name="Preferences.HotKeys" xml:space="preserve">
         <value>Hot Keys</value>
     </data>
+    <data name="Preferences.HotKeys.OpenHotKeys" xml:space="preserve">
+        <value>Show Hot Keys</value>
+    </data>
 </root>

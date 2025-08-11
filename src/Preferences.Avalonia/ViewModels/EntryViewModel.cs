@@ -24,6 +24,20 @@ using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;
 
+/// <summary>
+/// Represents a view model for an individual preference entry, providing reactive UI binding
+/// and localization support.
+/// </summary>
+/// <remarks>
+/// This sealed class wraps an <see cref="EntryModel"/> and exposes its properties in a UI-friendly way.
+/// It supports localization of entry titles through an optional <see cref="ILocalizationService"/>.
+/// 
+/// The view model reactively updates when the locale changes, and implements <see cref="IDisposable"/>
+/// to properly clean up event subscriptions when no longer needed.
+/// 
+/// Entry view models can represent various types of preferences, including those with predefined
+/// options (dropdown selections) or free-form input values.
+/// </remarks>
 public sealed class EntryViewModel : ReactiveObject, IDisposable
 {
     private readonly ILocalizationService? _localizationService;
@@ -59,7 +73,7 @@ public sealed class EntryViewModel : ReactiveObject, IDisposable
 
     public List<string>? Options => _model.Options;
 
-    public bool HasOptions => Options != null && Options.Count > 0;
+    public bool HasOptions => Options is { Count: > 0 };
 
     public void Dispose()
     {

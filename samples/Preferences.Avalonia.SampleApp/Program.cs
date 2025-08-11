@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 using Microsoft.Extensions.Configuration;
+using Preferences.Avalonia.SampleApp.Services;
 
 namespace Preferences.Avalonia.SampleApp;
 

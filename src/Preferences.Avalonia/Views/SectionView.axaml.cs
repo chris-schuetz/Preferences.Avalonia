@@ -18,28 +18,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Models;
+using System.Reactive;
+using System.Windows.Input;
+using Avalonia.Interactivity;
+using Avalonia.ReactiveUI;
+using Preferences.Avalonia.ViewModels;
+using ReactiveUI;
+
+namespace Preferences.Avalonia.Views;
 
 /// <summary>
-/// Represents a model for an individual preference entry in the application's configuration system.
+/// A user interface component for displaying a section of preferences.
 /// </summary>
-/// <remarks>
-/// This sealed class encapsulates a single configurable preference value, including its key, title,
-/// current value, and optional set of predefined choices.
-/// 
-/// Entry models are typically organized within <see cref="PreferencesSection"/> collections to form
-/// a complete preferences hierarchy. The entry's properties are exposed to the UI through the
-/// <see cref="EntryViewModel"/> wrapper class which provides additional UI-specific functionality
-/// and reactive binding support.
-/// 
-/// This class serves as part of the Model layer in the MVVM architecture pattern used throughout
-/// the preferences system.
-/// </remarks>
-public sealed class EntryModel
+public partial class SectionView : ReactiveUserControl<SectionViewModel>
 {
-    public required string Name { get; init; }
+    private readonly ICommand _hideOverlay;
 
-    public required string Value { get; set; }
-    
-    public List<string>? Options { get; set; }
+    public SectionView(ICommand hideOverlay)
+    {
+        _hideOverlay = hideOverlay;
+        InitializeComponent();
+    }
+
+    public SectionView(SectionViewModel viewModel, ICommand hideOverlay) : this(hideOverlay)
+    {
+        ViewModel = viewModel;
+    }
+
+    private void OkButton_Click(object? sender, RoutedEventArgs e)
+    {
+        _hideOverlay.Execute(Unit.Default);
+    }
 }

@@ -68,5 +68,11 @@ namespace Preferences.Avalonia.Resources {
                 return ResourceManager.GetString("Preferences.HotKeys", resourceCulture);
             }
         }
+        
+        internal static string Preferences_HotKeys_OpenHotKeys {
+            get {
+                return ResourceManager.GetString("Preferences.HotKeys.OpenHotKeys", resourceCulture);
+            }
+        }
     }
 }

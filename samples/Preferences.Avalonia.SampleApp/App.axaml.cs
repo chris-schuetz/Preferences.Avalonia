@@ -26,8 +26,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Preferences.Avalonia.Models;
+using Preferences.Avalonia.SampleApp.Services;
 using Preferences.Avalonia.SampleApp.ViewModels;
 using Preferences.Avalonia.SampleApp.Views;
+using Preferences.Avalonia.Services;
 using ZLogger;
 
 namespace Preferences.Avalonia.SampleApp;
@@ -48,6 +50,7 @@ public class App(IConfiguration configuration) : Application
                     .SetMinimumLevel(LogLevel.Trace)
                     .AddZLoggerConsole(options => { options.OutputEncodingToUtf8 = false; }))
             .AddSingleton(configuration)
+            .AddSingleton<ILocalizationService>(new AppLocalizationService())
             .Configure<PreferencesOptions>(options =>
                 configuration.GetSection(PreferencesOptions.Preferences).Bind(options))
             .AddSingleton<MainWindowViewModel>();

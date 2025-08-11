@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Christopher Schütz
+﻿// Copyright (c) 2025 Christopher Schuetz
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Avalonia;
@@ -27,6 +28,7 @@ using Avalonia.Styling;
 using Microsoft.Extensions.Options;
 using Preferences.Avalonia.Models;
 using Preferences.Avalonia.SampleApp.Services;
+using Preferences.Avalonia.Services;
 using Preferences.Avalonia.ViewModels;
 using ReactiveUI;
 
@@ -37,14 +39,22 @@ public class MainWindowViewModel : ViewModelBase
     private string _greeting = "Welcome to Avalonia!";
     private PreferencesOptions _preferencesOptions;
 
-    public MainWindowViewModel(IOptions<PreferencesOptions> hotKeyOptions)
+    public MainWindowViewModel(IOptions<PreferencesOptions> hotKeyOptions, ILocalizationService localizationService)
     {
         _preferencesOptions = hotKeyOptions.Value;
         OpenPreferencesDialog = ReactiveCommand.CreateFromTask(async () =>
         {
-            PreferencesOptions = await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions, new AppLocalizationService()));
+            PreferencesOptions =
+                await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions, localizationService));
             ConfigurationUpdater.UpdateAppSettings(PreferencesOptions, PreferencesOptions.Preferences);
         });
+        OpenHotKeysDialog = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await ShowHotKeysDialog.Handle(new SectionViewModel(
+                PreferencesOptions.Sections.First(s => s.Name == "Preferences.HotKeys"),
+                localizationService));
+        });
+        CloseOverlay = ReactiveCommand.CreateFromTask(async () => await HideOverlay.Handle(Unit.Default));
         ApplyTheme();
     }
 
@@ -63,6 +73,23 @@ public class MainWindowViewModel : ViewModelBase
 
     public IInteraction<PreferencesViewModel, PreferencesOptions> ShowPreferencesDialog { get; } =
         new Interaction<PreferencesViewModel, PreferencesOptions>();
+
+
+    public ICommand OpenHotKeysDialog { get; }
+
+    public KeyGesture? OpenHotKeysGesture
+    {
+        get
+        {
+            return PreferencesOptions.Sections.FirstOrDefault(s => s.Name == "Preferences.HotKeys")?.Entries
+                .FirstOrDefault(hk => hk.Name == "Preferences.HotKeys.OpenHotKeys") is { } open
+                ? KeyGesture.Parse(open.Value)
+                : null;
+        }
+    }
+    public IInteraction<SectionViewModel, Unit> ShowHotKeysDialog { get; } =
+        new Interaction<SectionViewModel, Unit>();
+
 
     public string Greeting
     {
@@ -86,13 +113,17 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public IInteraction<Unit, Unit> HideOverlay { get; } = new Interaction<Unit, Unit>();
+    
+    public ICommand CloseOverlay { get; }
+
     private void ApplyTheme()
     {
         if (Application.Current == null)
         {
             return;
         }
-        
+
         Application.Current.RequestedThemeVariant = PreferencesOptions.Sections
                 .FirstOrDefault(s => s.Name == "Preferences.General")?.Entries
                 .FirstOrDefault(e => e.Name == "Preferences.General.Theme")?.Value switch

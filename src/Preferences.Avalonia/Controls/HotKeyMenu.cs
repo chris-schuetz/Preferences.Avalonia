@@ -31,11 +31,12 @@ namespace Preferences.Avalonia.Controls;
 ///     An enhanced Avalonia Menu control that automatically registers keyboard shortcuts (input gestures)
 ///     from menu items to the parent window. This eliminates the need for manual key binding registration
 ///     and ensures all menu commands are accessible via their configured keyboard shortcuts.
-///     <br/>
+/// </summary>
+/// <remarks>
 ///     The control recursively scans all menu items for Command and InputGesture properties, registers
 ///     them as KeyBindings on the parent window, and maintains these bindings when input gestures change.
 ///     Based on the approach described at: https://github.com/AvaloniaUI/Avalonia/issues/2441#issuecomment-2742347861
-/// </summary>
+/// </remarks>
 public class HotKeyMenu : Menu
 {
     private readonly List<MenuItem> _items = [];
