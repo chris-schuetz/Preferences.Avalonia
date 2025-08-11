@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:Preferences.Avalonia.Models"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="Preferences.Avalonia.Views.PreferencesView"
         Title="PreferencesDialog"
@@ -10,9 +9,6 @@
         ExtendClientAreaToDecorationsHint="True"
         Width="1000" Height="600"
         WindowStartupLocation="CenterOwner">
-    <Window.DataContext>
-        <models:PreferencesOptions />
-    </Window.DataContext>
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
             <ExperimentalAcrylicBorder.Material>
@@ -30,15 +26,47 @@
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="0" ItemsSource="{Binding Sections}" >
+            <ListBox Grid.Column="0" 
+                     ItemsSource="{Binding Sections}" 
+                     SelectedItem="{Binding SelectedSection, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                         <TextBlock Text="{Binding Title}" />
+                        <TextBlock Text="{Binding Title}" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
             <GridSplitter Grid.Column="1" />
-            <Panel Grid.Column="2" />
+            <Panel Grid.Column="2">
+                <StackPanel>
+                    <TextBlock Text="{Binding SelectedSection.Title, StringFormat='Selected Section: {0}', FallbackValue='No section selected'}" 
+                               Margin="10,0,0,10"/>
+                    <TextBlock Text="{Binding SelectedSection.Entries.Count, StringFormat='Entry Count: {0}', FallbackValue='0'}" 
+                               Margin="10,0,0,10"/>
+                    
+                    <!-- Header row -->
+                    <Grid ColumnDefinitions="*,*" Margin="0,5,0,5">
+                        <TextBlock Grid.Column="0" Text="Title" FontWeight="Bold" Margin="10,0,0,0" />
+                        <TextBlock Grid.Column="1" Text="Value" FontWeight="Bold" Margin="10,0,0,0" />
+                    </Grid>
+        
+                    <Border BorderBrush="#44FFFFFF" BorderThickness="1">
+                        <ScrollViewer>
+                            <ItemsControl ItemsSource="{Binding SelectedSection.Entries, FallbackValue=[]}" 
+                                          Background="Transparent">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*,*" Margin="0,5,0,5">
+                                            <TextBlock Grid.Column="0" Text="{Binding Title}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                                            <TextBox Grid.Column="1" Text="{Binding Value}" Margin="10,2,10,2" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                </StackPanel>
+            </Panel>
         </Grid>
     </Panel>
 </Window>

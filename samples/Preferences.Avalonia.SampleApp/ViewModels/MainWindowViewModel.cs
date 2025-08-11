@@ -24,6 +24,7 @@ using System.Windows.Input;
 using Avalonia.Input;
 using Microsoft.Extensions.Options;
 using Preferences.Avalonia.Models;
+using Preferences.Avalonia.ViewModels;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.SampleApp.ViewModels;
@@ -38,7 +39,8 @@ public class MainWindowViewModel : ViewModelBase
         _preferencesOptions = hotKeyOptions.Value;
         OpenPreferencesDialog = ReactiveCommand.CreateFromTask(async () =>
         {
-            PreferencesOptions = await ShowPreferencesDialog.Handle(PreferencesOptions);
+            PreferencesOptions = await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions));
+            ConfigurationUpdater.UpdateAppSettings(PreferencesOptions, PreferencesOptions.Preferences);
         });
     }
 
@@ -55,8 +57,8 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public IInteraction<PreferencesOptions, PreferencesOptions> ShowPreferencesDialog { get; } =
-        new Interaction<PreferencesOptions, PreferencesOptions>();
+    public IInteraction<PreferencesViewModel, PreferencesOptions> ShowPreferencesDialog { get; } =
+        new Interaction<PreferencesViewModel, PreferencesOptions>();
 
     public string Greeting
     {

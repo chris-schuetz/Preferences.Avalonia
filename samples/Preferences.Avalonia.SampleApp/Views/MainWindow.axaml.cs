@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Avalonia.ReactiveUI;
 using Preferences.Avalonia.Models;
 using Preferences.Avalonia.SampleApp.ViewModels;
+using Preferences.Avalonia.ViewModels;
 using Preferences.Avalonia.Views;
 using ReactiveUI;
 
@@ -16,7 +17,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             action(ViewModel!.ShowPreferencesDialog.RegisterHandler(DoShowDialogAsync)));
     }
 
-    private async Task DoShowDialogAsync(IInteractionContext<PreferencesOptions, PreferencesOptions> interaction)
+    private async Task DoShowDialogAsync(IInteractionContext<PreferencesViewModel, PreferencesOptions> interaction)
     {
         var dialog = new PreferencesView
         {
@@ -24,13 +25,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
 
         _ = await dialog.ShowDialog<PreferencesOptions>(this);
-        if (dialog.DataContext is PreferencesOptions options)
-        { 
-            interaction.SetOutput(options);
-        }
-        else
-        {
-            interaction.SetOutput(interaction.Input);
-        }
+        interaction.SetOutput(interaction.Input.Options);
     }
 }

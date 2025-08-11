@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using DynamicData;
 using Preferences.Avalonia.Models;
 using ReactiveUI;
 
@@ -8,9 +10,10 @@ public class SectionViewModel : ReactiveObject
     public SectionViewModel(PreferencesSection model)
     {
         Title = model.Title;
+        Entries = new ObservableCollection<EntryViewModel>(model.Entries.Select(e => new EntryViewModel(e)));
     }
 
     public string Title { get; }
 
-    public List<EntryViewModel> Entries { get; } = new();
+    public ObservableCollection<EntryViewModel> Entries { get; }
 }
