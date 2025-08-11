@@ -28,8 +28,14 @@ using Avalonia.VisualTree;
 namespace Preferences.Avalonia.Controls;
 
 /// <summary>
-///     A menu that automatically adds key bindings to the window.
-///     Idea from: https://github.com/AvaloniaUI/Avalonia/issues/2441#issuecomment-2742347861
+/// An enhanced Avalonia Menu control that automatically registers keyboard shortcuts (input gestures) 
+/// from menu items to the parent window. This eliminates the need for manual key binding registration
+/// and ensures all menu commands are accessible via their configured keyboard shortcuts.
+/// 
+/// The control recursively scans all menu items for Command and InputGesture properties, registers
+/// them as KeyBindings on the parent window, and maintains these bindings when input gestures change.
+/// 
+/// Based on the approach described at: https://github.com/AvaloniaUI/Avalonia/issues/2441#issuecomment-2742347861
 /// </summary>
 public class HotKeyMenu : Menu
 {
