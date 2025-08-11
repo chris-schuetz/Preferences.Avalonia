@@ -24,6 +24,7 @@ using System.Windows.Input;
 using Avalonia.Input;
 using Microsoft.Extensions.Options;
 using Preferences.Avalonia.Models;
+using Preferences.Avalonia.SampleApp.Services;
 using Preferences.Avalonia.ViewModels;
 using ReactiveUI;
 
@@ -39,7 +40,7 @@ public class MainWindowViewModel : ViewModelBase
         _preferencesOptions = hotKeyOptions.Value;
         OpenPreferencesDialog = ReactiveCommand.CreateFromTask(async () =>
         {
-            PreferencesOptions = await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions));
+            PreferencesOptions = await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions, new AppLocalizationService()));
             ConfigurationUpdater.UpdateAppSettings(PreferencesOptions, PreferencesOptions.Preferences);
         });
     }
@@ -50,8 +51,8 @@ public class MainWindowViewModel : ViewModelBase
     {
         get
         {
-            return PreferencesOptions.Sections.FirstOrDefault(s => s.Name == "HotKeys")?.Entries
-                .FirstOrDefault(hk => hk.Name == "OpenPreferences") is { } open
+            return PreferencesOptions.Sections.FirstOrDefault(s => s.Name == "Preferences.HotKeys")?.Entries
+                .FirstOrDefault(hk => hk.Name == "Preferences.HotKeys.OpenPreferences") is { } open
                 ? KeyGesture.Parse(open.Value)
                 : null;
         }

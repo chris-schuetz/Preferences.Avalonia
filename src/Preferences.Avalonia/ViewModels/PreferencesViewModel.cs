@@ -19,36 +19,38 @@
 // SOFTWARE.
 
 using Preferences.Avalonia.Models;
+using Preferences.Avalonia.Services;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;
 
 public class PreferencesViewModel : ReactiveObject
 {
-    private readonly PreferencesOptions _preferencesOptions;
-    private SectionViewModel _selectedSection;
+    private readonly ILocalizationService? _localizationService;
+    private SectionViewModel? _selectedSection;
 
-    public PreferencesViewModel() : this(new PreferencesOptions())
+    public PreferencesViewModel(PreferencesOptions preferencesOptions, ILocalizationService? localizationService = null)
     {
-    }
-
-    public PreferencesViewModel(PreferencesOptions preferencesOptions)
-    {
-        _preferencesOptions = preferencesOptions;
+        _localizationService = localizationService;
+        Options = preferencesOptions;
 
         // Convert model sections to view model sections
         Sections = new List<SectionViewModel>();
-        foreach (var section in _preferencesOptions.Sections) Sections.Add(new SectionViewModel(section));
-        SelectedSection = Sections[0];
+        foreach (var section in Options.Sections)
+        {
+            Sections.Add(new SectionViewModel(section, _localizationService));
+        }
+        
+        SelectedSection = Sections.FirstOrDefault();
     }
 
     public List<SectionViewModel> Sections { get; }
 
-    public SectionViewModel SelectedSection
+    public SectionViewModel? SelectedSection
     {
         get => _selectedSection;
         set => this.RaiseAndSetIfChanged(ref _selectedSection, value);
     }
 
-    public PreferencesOptions Options => _preferencesOptions;
+    public PreferencesOptions Options { get; }
 }

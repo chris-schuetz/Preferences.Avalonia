@@ -18,11 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Models;
+namespace Preferences.Avalonia.Services;
 
-public sealed class EntryModel
+/// <summary>
+///     Interface for providing localized strings to the Preferences.Avalonia library
+/// </summary>
+public interface ILocalizationService
 {
-    public required string Name { get; init; }
-
-    public required string Value { get; set; }
+    /// <summary>
+    ///     Gets a localized string for the specified resource key
+    /// </summary>
+    /// <param name="resourceKey">The resource key to look up</param>
+    /// <returns>The localized string or the key itself if not found</returns>
+    string GetLocalizedString(string resourceKey);
+    
+    /// <summary>
+    /// Event that is triggered when the locale changes
+    /// </summary>
+    event EventHandler LocaleChanged;
 }
