@@ -57,6 +57,10 @@ public sealed class EntryViewModel : ReactiveObject, IDisposable
         set => _model.Value = value;
     }
 
+    public List<string>? Options => _model.Options;
+
+    public bool HasOptions => Options != null && Options.Count > 0;
+
     public void Dispose()
     {
         Dispose(true);

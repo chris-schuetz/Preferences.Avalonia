@@ -25,4 +25,6 @@ public sealed class EntryModel
     public required string Name { get; init; }
 
     public required string Value { get; set; }
+    
+    public List<string>? Options { get; set; }
 }
