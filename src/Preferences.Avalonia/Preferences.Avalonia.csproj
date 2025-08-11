@@ -4,6 +4,21 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- NuGet package properties -->
+        <PackageId>Preferences.Avalonia</PackageId>
+        <Authors>Christopher Schuetz</Authors>
+        <Description>Preferences management for Avalonia applications</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/chris-schuetz/Preferences.Avalonia</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/chris-schuetz/Preferences.Avalonia.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>avalonia;preferences;settings</PackageTags>
+
+        <!-- GitVersion configuration -->
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,6 +32,10 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5"/>
+        <PackageReference Include="GitVersion.MsBuild" Version="6.4.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
     </ItemGroup>
 
