@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Christopher Schütz
+// Copyright (c) 2025 Christopher Schuetz
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,13 @@ using Avalonia.VisualTree;
 namespace Preferences.Avalonia.Controls;
 
 /// <summary>
-/// An enhanced Avalonia Menu control that automatically registers keyboard shortcuts (input gestures) 
-/// from menu items to the parent window. This eliminates the need for manual key binding registration
-/// and ensures all menu commands are accessible via their configured keyboard shortcuts.
-/// 
-/// The control recursively scans all menu items for Command and InputGesture properties, registers
-/// them as KeyBindings on the parent window, and maintains these bindings when input gestures change.
-/// 
-/// Based on the approach described at: https://github.com/AvaloniaUI/Avalonia/issues/2441#issuecomment-2742347861
+///     An enhanced Avalonia Menu control that automatically registers keyboard shortcuts (input gestures)
+///     from menu items to the parent window. This eliminates the need for manual key binding registration
+///     and ensures all menu commands are accessible via their configured keyboard shortcuts.
+///     <br/>
+///     The control recursively scans all menu items for Command and InputGesture properties, registers
+///     them as KeyBindings on the parent window, and maintains these bindings when input gestures change.
+///     Based on the approach described at: https://github.com/AvaloniaUI/Avalonia/issues/2441#issuecomment-2742347861
 /// </summary>
 public class HotKeyMenu : Menu
 {
@@ -45,8 +44,7 @@ public class HotKeyMenu : Menu
     {
     }
 
-    public HotKeyMenu(IMenuInteractionHandler interactionHandler) : base(
-        interactionHandler)
+    public HotKeyMenu(IMenuInteractionHandler interactionHandler) : base(interactionHandler)
     {
     }
 
@@ -59,35 +57,78 @@ public class HotKeyMenu : Menu
         UpdateHotKeys();
     }
 
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+
+        var window = this.FindAncestorOfType<Window>();
+        if (window != null)
+        {
+            foreach (var item in _items)
+            {
+                var existingBinding = window.KeyBindings
+                    .FirstOrDefault(kb => kb.Command == item.Command && kb.Gesture == item.InputGesture);
+                if (existingBinding != null)
+                {
+                    window.KeyBindings.Remove(existingBinding);
+                }
+
+                item.PropertyChanged -= HandleGestureChanged;
+            }
+        }
+
+        _items.Clear();
+    }
+
     private void HandleGestureChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        if (e.Property != MenuItem.InputGestureProperty) return;
+        if (e.Property != MenuItem.InputGestureProperty)
+        {
+            return;
+        }
 
         UpdateHotKeys();
     }
 
     private void UpdateHotKeys()
     {
-        _items.Clear();
         var window = this.FindAncestorOfType<Window>();
         if (window is null)
         {
             return;
         }
 
-        foreach (var logicalChild in LogicalChildren.OfType<MenuItem>()) SearchKeyBinding(logicalChild);
+        foreach (var item in _items)
+        {
+            var existingBinding = window.KeyBindings
+                .FirstOrDefault(kb => kb.Command == item.Command && kb.Gesture == item.InputGesture);
+            if (existingBinding != null)
+            {
+                window.KeyBindings.Remove(existingBinding);
+            }
+
+            item.PropertyChanged -= HandleGestureChanged;
+        }
+
+        _items.Clear();
+        foreach (var logicalChild in LogicalChildren.OfType<MenuItem>())
+        {
+            SearchKeyBinding(logicalChild);
+        }
 
         foreach (var item in _items)
         {
             window.KeyBindings.Add(new KeyBinding { Command = item.Command!, Gesture = item.InputGesture! });
-            item.PropertyChanged -= HandleGestureChanged;
             item.PropertyChanged += HandleGestureChanged;
         }
     }
 
     private void SearchKeyBinding(MenuItem mi)
     {
-        foreach (var logicalChild in mi.GetLogicalChildren().OfType<MenuItem>()) SearchKeyBinding(logicalChild);
+        foreach (var logicalChild in mi.GetLogicalChildren().OfType<MenuItem>())
+        {
+            SearchKeyBinding(logicalChild);
+        }
 
         if (mi.Command == null || mi.InputGesture == null)
         {
