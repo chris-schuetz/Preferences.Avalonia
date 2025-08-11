@@ -21,7 +21,9 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Input;
+using Avalonia.Styling;
 using Microsoft.Extensions.Options;
 using Preferences.Avalonia.Models;
 using Preferences.Avalonia.SampleApp.Services;
@@ -43,6 +45,7 @@ public class MainWindowViewModel : ViewModelBase
             PreferencesOptions = await ShowPreferencesDialog.Handle(new PreferencesViewModel(PreferencesOptions, new AppLocalizationService()));
             ConfigurationUpdater.UpdateAppSettings(PreferencesOptions, PreferencesOptions.Preferences);
         });
+        ApplyTheme();
     }
 
     public ICommand OpenPreferencesDialog { get; }
@@ -79,6 +82,24 @@ public class MainWindowViewModel : ViewModelBase
             _preferencesOptions = value;
             this.RaisePropertyChanged();
             this.RaisePropertyChanged(nameof(OpenPreferencesGesture));
+            ApplyTheme();
         }
+    }
+
+    private void ApplyTheme()
+    {
+        if (Application.Current == null)
+        {
+            return;
+        }
+        
+        Application.Current.RequestedThemeVariant = PreferencesOptions.Sections
+                .FirstOrDefault(s => s.Name == "Preferences.General")?.Entries
+                .FirstOrDefault(e => e.Name == "Preferences.General.Theme")?.Value switch
+            {
+                "Light" => ThemeVariant.Light,
+                "Dark" => ThemeVariant.Dark,
+                _ => ThemeVariant.Default
+            };
     }
 }

@@ -45,9 +45,9 @@ namespace Preferences.Avalonia.Resources {
             }
         }
         
-        internal static string Preferences_General_Stuff {
+        internal static string Preferences_General_Theme {
             get {
-                return ResourceManager.GetString("Preferences.General.Stuff", resourceCulture);
+                return ResourceManager.GetString("Preferences.General.Theme", resourceCulture);
             }
         }
         

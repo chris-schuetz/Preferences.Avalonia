@@ -23,8 +23,8 @@
             PublicKeyToken=b77a5c561934e089
         </value>
     </resheader>
-    <data name="Preferences.General.Stuff" xml:space="preserve">
-        <value>Stuff</value>
+    <data name="Preferences.General.Theme" xml:space="preserve">
+        <value>Theme</value>
     </data>
     <data name="Preferences.HotKeys.OpenPreferences" xml:space="preserve">
         <value>Open Preferences</value>
