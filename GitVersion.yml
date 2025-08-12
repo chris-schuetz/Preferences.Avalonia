@@ -15,7 +15,7 @@ branches:
     tracks-release-branches: true
     is-release-branch: false
   release:
-    regex: ^releases?[/-]
+    regex: ^features?[\/-](?<BranchName>.+)
     mode: ContinuousDelivery
     increment: Patch
     track-merge-target: false
