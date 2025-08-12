@@ -1,9 +1,7 @@
-using System;
 using System.Globalization;
 using System.Resources;
-using Preferences.Common;
 
-namespace Preferences.Avalonia.SampleApp.Services;
+namespace Preferences.Common.SampleApp.Services;
 
 public class AppLocalizationService : ILocalizationService
 {

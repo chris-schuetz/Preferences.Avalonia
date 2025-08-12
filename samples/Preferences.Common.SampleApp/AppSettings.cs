@@ -1,10 +1,11 @@
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-public static class ConfigurationUpdater
+namespace Preferences.Common.SampleApp;
+
+public static class AppSettings
 {
-    public static void UpdateAppSettings<T>(T options, string sectionName, string appSettingsPath = "appsettings.json") where T : class
+    public static void Update<T>(T options, string sectionName, string appSettingsPath = "appsettings.json") where T : class
     {
         // Read the existing JSON file
         string json = File.ReadAllText(appSettingsPath);

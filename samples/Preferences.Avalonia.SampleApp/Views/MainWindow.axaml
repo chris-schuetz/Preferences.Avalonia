@@ -26,7 +26,7 @@
                     <MenuItem Header="_File" IsVisible="True">
                         <MenuItem Header="_Preferences..." InputGesture="{Binding OpenPreferencesGesture}"
                                   Command="{Binding OpenPreferencesDialog}" />
-                        <MenuItem Header="_Hot Keys..." InputGesture="{Binding OpenHotKeysGesture}"
+                                                          <MenuItem Header="_Hot Keys..." InputGesture="{Binding ShowHotKeysGesture}"
                                   Command="{Binding OpenHotKeysDialog}" />
                         <Separator />
                         <MenuItem Header="_Exit" InputGesture="{Binding ExitApplicationGesture}"

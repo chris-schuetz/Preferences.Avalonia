@@ -10,8 +10,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
+        <Folder Include="Resources\" />
+        <Folder Include="Services\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -37,6 +38,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Preferences.Avalonia\Preferences.Avalonia.csproj"/>
+        <ProjectReference Include="..\Preferences.Common.SampleApp\Preferences.Common.SampleApp.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -46,9 +48,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Update="Resources\General.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <LastGenOutput>General.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
+      <Content Include="..\appsettings.json">
+        <Link>appsettings.json</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 </Project>
