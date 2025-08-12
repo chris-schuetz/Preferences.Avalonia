@@ -18,13 +18,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/Preferences.Avalonia/Preferences.Avalonia.csproj      
+        run: dotnet restore Preferences.slnx
       
       - name: Build
-        run: dotnet build src/Preferences.Avalonia/Preferences.Avalonia.csproj --configuration Release --no-restore
+        run: dotnet build Preferences.slnx --configuration Release --no-restore
 
       - name: Publish to NuGet.org
-        run: dotnet nuget push **/Preferences.Avalonia.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push **/Preferences.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
