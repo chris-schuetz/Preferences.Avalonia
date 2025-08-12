@@ -53,6 +53,7 @@ public class MainWindowViewModel : ViewModelBase
                 localizationService));
         });
         CloseOverlay = ReactiveCommand.CreateFromTask(async () => await HideOverlay.Handle(Unit.Default));
+        ExecuteExitApplication = ReactiveCommand.CreateFromTask(async () => await ExitApplication.Handle(Unit.Default));
         ApplyTheme();
     }
 
@@ -85,6 +86,7 @@ public class MainWindowViewModel : ViewModelBase
                 : null;
         }
     }
+
     public IInteraction<SectionViewModel, Unit> ShowHotKeysDialog { get; } =
         new Interaction<SectionViewModel, Unit>();
 
@@ -115,6 +117,21 @@ public class MainWindowViewModel : ViewModelBase
     
     public ICommand CloseOverlay { get; }
 
+    public IInteraction<Unit, Unit> ExitApplication { get; } = new Interaction<Unit, Unit>();
+    
+    public ICommand ExecuteExitApplication { get; }
+
+    public KeyGesture? ExitApplicationGesture
+    {
+        get
+        {
+            return PreferencesOptions.Sections.FirstOrDefault(s => s.Name == "Preferences.HotKeys")?.Entries
+                .FirstOrDefault(hk => hk.Name == "Preferences.HotKeys.Exit") is { } open
+                ? KeyGesture.Parse(open.Value)
+                : null;
+        }
+    }
+    
     private void ApplyTheme()
     {
         if (Application.Current == null)

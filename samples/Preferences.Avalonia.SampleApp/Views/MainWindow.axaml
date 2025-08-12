@@ -29,7 +29,8 @@
                         <MenuItem Header="_Hot Keys..." InputGesture="{Binding OpenHotKeysGesture}"
                                   Command="{Binding OpenHotKeysDialog}" />
                         <Separator />
-                        <MenuItem Header="_Exit" />
+                        <MenuItem Header="_Exit" InputGesture="{Binding ExitApplicationGesture}"
+                                  Command="{Binding ExecuteExitApplication}" />
                     </MenuItem>
                     <MenuItem Header="" IsVisible="False">
                         <!-- MenuItem Header="MyInvisCommand" InputGesture="Ctrl+I" Command="{Binding DoStuff}" /-->

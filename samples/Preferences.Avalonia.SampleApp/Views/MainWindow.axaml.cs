@@ -21,6 +21,7 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using Preferences.Avalonia.SampleApp.ViewModels;
 using Preferences.Avalonia.ViewModels;
@@ -40,7 +41,16 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action =>
             action(ViewModel!.ShowHotKeysDialog.RegisterHandler(DoShowHotKeysAsync)));
         this.WhenActivated(action =>
+            action(ViewModel!.ExitApplication.RegisterHandler(DoExitApplicationAsync)));
+        this.WhenActivated(action =>
             action(ViewModel!.HideOverlay.RegisterHandler(DoHideOverlayAsync)));
+    }
+    
+    private Task DoExitApplicationAsync(IInteractionContext<Unit, Unit> interaction)
+    {
+        Close();
+        interaction.SetOutput(Unit.Default);
+        return Task.CompletedTask;
     }
 
     private Task DoShowHotKeysAsync(IInteractionContext<SectionViewModel, Unit> interaction)
