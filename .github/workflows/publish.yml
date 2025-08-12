@@ -4,13 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-    types: [ closed ]
 
 jobs:
   build_and_publish:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     
     steps:
@@ -31,5 +27,4 @@ jobs:
         run: dotnet build src/Preferences.Avalonia/Preferences.Avalonia.csproj --configuration Release --no-restore
 
       - name: Publish to NuGet.org
-        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
         run: dotnet nuget push **/Preferences.Avalonia.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
