@@ -24,11 +24,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
-
+        run: dotnet restore src/Preferences.Avalonia/Preferences.Avalonia.csproj      
+      
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build src/Preferences.Avalonia/Preferences.Avalonia.csproj --configuration Release --no-restore
 
       - name: Publish to NuGet.org
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-        run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push **/Preferences.Avalonia.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
