@@ -9,6 +9,7 @@
         <PackageId>Preferences.Spectre</PackageId>
         <Authors>Christopher Schuetz</Authors>
         <Description>Preferences management for Spectre applications</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/chris-schuetz/Preferences</PackageProjectUrl>
         <RepositoryUrl>https://github.com/chris-schuetz/Preferences.git</RepositoryUrl>
@@ -32,6 +33,10 @@
 
     <ItemGroup>
       <PackageReference Include="Spectre.Console" Version="0.50.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="docs\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>

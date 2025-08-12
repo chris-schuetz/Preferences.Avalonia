@@ -9,6 +9,7 @@
         <PackageId>Preferences.Common</PackageId>
         <Authors>Christopher Schuetz</Authors>
         <Description>Common helpers for preferences management</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/chris-schuetz/Preferences</PackageProjectUrl>
         <RepositoryUrl>https://github.com/chris-schuetz/Preferences.git</RepositoryUrl>
@@ -25,5 +26,9 @@
         <FileVersion>$(GitVersion_AssemblySemFileVer)</FileVersion>
         <InformationalVersion>$(GitVersion_InformationalVersion)</InformationalVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="docs\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>
