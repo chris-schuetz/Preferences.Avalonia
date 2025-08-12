@@ -19,8 +19,7 @@
 // SOFTWARE.
 
 using System.Collections.ObjectModel;
-using Preferences.Avalonia.Models;
-using Preferences.Avalonia.Services;
+using Preferences.Common;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;

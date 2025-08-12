@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Preferences.Avalonia.Models;
-using Preferences.Avalonia.Services;
+using Preferences.Common;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;

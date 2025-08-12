@@ -10,8 +10,8 @@
         <Authors>Christopher Schuetz</Authors>
         <Description>Preferences management for Avalonia applications</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/chris-schuetz/Preferences.Avalonia</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/chris-schuetz/Preferences.Avalonia.git</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/chris-schuetz/Preferences</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/chris-schuetz/Preferences.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>avalonia;preferences;settings</PackageTags>
 
@@ -42,6 +42,10 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Preferences.Common\Preferences.Common.csproj" />
     </ItemGroup>
 
 </Project>

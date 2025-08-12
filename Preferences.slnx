@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="samples\Preferences.Avalonia.SampleApp\Preferences.Avalonia.SampleApp.csproj" Type="Classic C#" />
+  <Project Path="samples\Preferences.Spectre.SampleApp\Preferences.Spectre.SampleApp.csproj" Type="Classic C#" />
+  <Project Path="src\Preferences.Avalonia\Preferences.Avalonia.csproj" Type="Classic C#" />
+  <Project Path="src\Preferences.Common\Preferences.Common.csproj" Type="Classic C#" />
+  <Project Path="src\Preferences.Spectre\Preferences.Spectre.csproj" Type="Classic C#" />
+</Solution>

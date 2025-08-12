@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Resources;
-using Preferences.Avalonia.Services;
+using Preferences.Common;
 
 namespace Preferences.Avalonia.SampleApp.Services;
 

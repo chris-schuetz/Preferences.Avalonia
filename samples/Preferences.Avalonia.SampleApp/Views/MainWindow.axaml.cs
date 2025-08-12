@@ -22,10 +22,10 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
-using Preferences.Avalonia.Models;
 using Preferences.Avalonia.SampleApp.ViewModels;
 using Preferences.Avalonia.ViewModels;
 using Preferences.Avalonia.Views;
+using Preferences.Common;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.SampleApp.Views;

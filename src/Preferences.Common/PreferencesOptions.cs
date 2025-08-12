@@ -18,30 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Models;
+namespace Preferences.Common;
 
 /// <summary>
-/// Represents a logical grouping of related preference entries within the application's configuration system.
+/// Represents the root container for all application preferences organized in sections.
 /// </summary>
 /// <remarks>
-/// This class defines a section of related preferences that are displayed together in the UI.
-/// Each section contains a collection of <see cref="EntryModel"/> instances representing
-/// individual configurable preferences.
+/// This class serves as the top-level model for the preferences system, containing a collection
+/// of <see cref="PreferencesSection"/> objects that group related preferences together.
 /// 
-/// Sections can be ordered through their Order property to control their display sequence in the UI.
-/// Each section typically has a Title that describes the category of preferences it contains.
+/// PreferencesOptions is typically used when initializing the preferences UI system and provides
+/// the complete preferences hierarchy for the application. It defines a constant string identifier
+/// for preferences configuration.
 /// 
-/// PreferencesSection objects are organized within a <see cref="PreferencesOptions"/> container
-/// to form the complete preferences hierarchy of the application.
-/// 
-/// This class serves as part of the Model layer in the MVVM architecture pattern used throughout
-/// the preferences system.
+/// The class follows a simple structure where all preference sections are stored in a flat list,
+/// with each section containing its own entries. This design allows for flexible organization
+/// of application settings while maintaining a consistent UI representation.
 /// </remarks>
-public class PreferencesSection
+public class PreferencesOptions
 {
-    public required string Name { get; init; }
+    public const string Preferences = "Preferences";
 
-    public required int Order { get; set; }
-
-    public required List<EntryModel> Entries { get; set; }
+    public List<PreferencesSection> Sections { get; set; } = [];
 }

@@ -25,11 +25,10 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Preferences.Avalonia.Models;
 using Preferences.Avalonia.SampleApp.Services;
 using Preferences.Avalonia.SampleApp.ViewModels;
 using Preferences.Avalonia.SampleApp.Views;
-using Preferences.Avalonia.Services;
+using Preferences.Common;
 using ZLogger;
 
 namespace Preferences.Avalonia.SampleApp;

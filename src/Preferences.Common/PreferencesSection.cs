@@ -18,28 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Models;
+namespace Preferences.Common;
 
 /// <summary>
-/// Represents a model for an individual preference entry in the application's configuration system.
+/// Represents a logical grouping of related preference entries within the application's configuration system.
 /// </summary>
 /// <remarks>
-/// This sealed class encapsulates a single configurable preference value, including its key, title,
-/// current value, and optional set of predefined choices.
+/// This class defines a section of related preferences that are displayed together in the UI.
+/// Each section contains a collection of <see cref="PreferencesEntry"/> instances representing
+/// individual configurable preferences.
 /// 
-/// Entry models are typically organized within <see cref="PreferencesSection"/> collections to form
-/// a complete preferences hierarchy. The entry's properties are exposed to the UI through the
-/// <see cref="EntryViewModel"/> wrapper class which provides additional UI-specific functionality
-/// and reactive binding support.
+/// Sections can be ordered through their Order property to control their display sequence in the UI.
+/// Each section typically has a Title that describes the category of preferences it contains.
+/// 
+/// PreferencesSection objects are organized within a <see cref="Preferences.Common.PreferencesOptions"/> container
+/// to form the complete preferences hierarchy of the application.
 /// 
 /// This class serves as part of the Model layer in the MVVM architecture pattern used throughout
 /// the preferences system.
 /// </remarks>
-public sealed class EntryModel
+public class PreferencesSection
 {
     public required string Name { get; init; }
 
-    public required string Value { get; set; }
-    
-    public List<string>? Options { get; set; }
+    public required int Order { get; set; }
+
+    public required List<PreferencesEntry> Entries { get; set; }
 }

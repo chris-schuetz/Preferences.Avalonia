@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Services;
+namespace Preferences.Common;
 
 /// <summary>
 ///     Interface for providing localized strings to the Preferences.Avalonia library

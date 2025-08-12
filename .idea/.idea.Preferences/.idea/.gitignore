@@ -2,9 +2,9 @@
 /shelf/
 /workspace.xml
 # Rider ignored files
-/.idea.Preferences.Avalonia.iml
-/contentModel.xml
+/.idea.Preferences.iml
 /projectSettingsUpdater.xml
+/contentModel.xml
 /modules.xml
 # Editor-based HTTP Client requests
 /httpRequests/

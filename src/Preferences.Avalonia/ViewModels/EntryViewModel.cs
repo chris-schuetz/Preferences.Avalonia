@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Preferences.Avalonia.Models;
-using Preferences.Avalonia.Services;
+using Preferences.Common;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;
@@ -29,7 +28,7 @@ namespace Preferences.Avalonia.ViewModels;
 /// and localization support.
 /// </summary>
 /// <remarks>
-/// This sealed class wraps an <see cref="EntryModel"/> and exposes its properties in a UI-friendly way.
+/// This sealed class wraps an <see cref="PreferencesEntry"/> and exposes its properties in a UI-friendly way.
 /// It supports localization of entry titles through an optional <see cref="ILocalizationService"/>.
 /// 
 /// The view model reactively updates when the locale changes, and implements <see cref="IDisposable"/>
@@ -41,10 +40,10 @@ namespace Preferences.Avalonia.ViewModels;
 public sealed class EntryViewModel : ReactiveObject, IDisposable
 {
     private readonly ILocalizationService? _localizationService;
-    private readonly EntryModel _model;
+    private readonly PreferencesEntry _model;
     private bool _isDisposed;
 
-    public EntryViewModel(EntryModel model, ILocalizationService? localizationService = null)
+    public EntryViewModel(PreferencesEntry model, ILocalizationService? localizationService = null)
     {
         _model = model;
         _localizationService = localizationService;

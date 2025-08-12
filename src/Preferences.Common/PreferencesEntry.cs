@@ -18,26 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Avalonia.Models;
+namespace Preferences.Common;
 
 /// <summary>
-/// Represents the root container for all application preferences organized in sections.
+/// Represents a model for an individual preference entry in the application's configuration system.
 /// </summary>
 /// <remarks>
-/// This class serves as the top-level model for the preferences system, containing a collection
-/// of <see cref="PreferencesSection"/> objects that group related preferences together.
+/// This sealed class encapsulates a single configurable preference value, including its key, title,
+/// current value, and optional set of predefined choices.
 /// 
-/// PreferencesOptions is typically used when initializing the preferences UI system and provides
-/// the complete preferences hierarchy for the application. It defines a constant string identifier
-/// for preferences configuration.
+/// Preferences entries are typically organized within <see cref="PreferencesSection"/> collections to form
+/// a complete preferences hierarchy. The entry's properties are exposed to the UI through the
+/// <see cref="EntryViewModel"/> wrapper class which provides additional UI-specific functionality
+/// and reactive binding support.
 /// 
-/// The class follows a simple structure where all preference sections are stored in a flat list,
-/// with each section containing its own entries. This design allows for flexible organization
-/// of application settings while maintaining a consistent UI representation.
+/// This class serves as part of the Model layer in the MVVM architecture pattern used throughout
+/// the preferences system.
 /// </remarks>
-public class PreferencesOptions
+public sealed class PreferencesEntry
 {
-    public const string Preferences = "Preferences";
+    public required string Name { get; init; }
 
-    public List<PreferencesSection> Sections { get; set; } = [];
+    public required string Value { get; set; }
+    
+    public List<string>? Options { get; set; }
 }

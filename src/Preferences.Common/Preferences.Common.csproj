@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <!-- NuGet package properties -->
+        <PackageId>Preferences.Common</PackageId>
+        <Authors>Christopher Schuetz</Authors>
+        <Description>Common helpers for preferences management</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/chris-schuetz/Preferences</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/chris-schuetz/Preferences.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>preferences;settings</PackageTags>
+
+        <!-- GitVersion configuration -->
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>$(GitVersion_NuGetVersion)</PackageVersion>
+        <Version>$(GitVersion_FullSemVer)</Version>
+        <AssemblyVersion>$(GitVersion_AssemblySemVer)</AssemblyVersion>
+        <FileVersion>$(GitVersion_AssemblySemFileVer)</FileVersion>
+        <InformationalVersion>$(GitVersion_InformationalVersion)</InformationalVersion>
+    </PropertyGroup>
+
+</Project>

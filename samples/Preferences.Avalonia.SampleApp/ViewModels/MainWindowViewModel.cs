@@ -26,10 +26,8 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Styling;
 using Microsoft.Extensions.Options;
-using Preferences.Avalonia.Models;
-using Preferences.Avalonia.SampleApp.Services;
-using Preferences.Avalonia.Services;
 using Preferences.Avalonia.ViewModels;
+using Preferences.Common;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.SampleApp.ViewModels;
