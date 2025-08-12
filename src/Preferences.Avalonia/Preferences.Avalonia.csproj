@@ -19,6 +19,11 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>$(GitVersion_NuGetVersion)</PackageVersion>
+        <Version>$(GitVersion_FullSemVer)</Version>
+        <AssemblyVersion>$(GitVersion_AssemblySemVer)</AssemblyVersion>
+        <FileVersion>$(GitVersion_AssemblySemFileVer)</FileVersion>
+        <InformationalVersion>$(GitVersion_InformationalVersion)</InformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>
