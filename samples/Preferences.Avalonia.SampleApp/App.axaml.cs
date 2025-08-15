@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Christopher Schütz
+// Copyright (c) 2025 Christopher Schuetz
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ using Preferences.Avalonia.SampleApp.ViewModels;
 using Preferences.Avalonia.SampleApp.Views;
 using Preferences.Common;
 using Preferences.Common.SampleApp.Services;
+using Preferences.Common.Services;
 using ZLogger;
 
 namespace Preferences.Avalonia.SampleApp;
@@ -59,12 +60,10 @@ public class App(IConfiguration configuration) : Application
         Logger.Sink = services.GetService<LoggerSink>();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
             desktop.MainWindow = new MainWindow
             {
                 DataContext = services.GetRequiredService<MainWindowViewModel>()
             };
-        }
 
         base.OnFrameworkInitializationCompleted();
     }

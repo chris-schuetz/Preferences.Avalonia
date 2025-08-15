@@ -28,7 +28,6 @@ public interface IScreen
     string StatusBarHintText { get; set; }
     StatusMessageType StatusBarStatusMessageType { get; set; }
     string Title { get; set; }
-    void UpdateTheme(string themeName);
     void InitializeLayout();
     void RenderLayout();
 }

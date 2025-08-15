@@ -1,15 +1,15 @@
 ﻿// Copyright (c) 2025 Christopher Schuetz
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,12 +20,18 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Preferences.Common;
+using Preferences.Common.Messages;
 using Preferences.Common.SampleApp.Services;
 using Preferences.Common.Services;
 using Preferences.Spectre.SampleApp.Pages;
 using Preferences.Spectre.SampleApp.Rendering;
+using SlimMessageBus;
+using SlimMessageBus.Host;
+using SlimMessageBus.Host.Memory;
+using SlimMessageBus.Host.Serialization.SystemTextJson;
 using Spectre.Console;
 using ZLogger;
 
@@ -33,43 +39,50 @@ namespace Preferences.Spectre.SampleApp;
 
 internal sealed class Program
 {
-    // Add static service provider for accessing services from anywhere
-    public static IServiceProvider? ServiceProvider { get; private set; }
-
     public static async Task<int> Main(string[] args)
     {
         try
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", true, true)
-                .AddEnvironmentVariables()
-                .AddCommandLine(args)
-                .Build();
-
-            var services = new ServiceCollection();
-            ConfigureServices(services, configuration);
-
-            using var serviceProvider = services.BuildServiceProvider();
-            ServiceProvider = serviceProvider;
-
-            var app = serviceProvider.GetRequiredService<InteractiveApplication>();
-
-            return await app.RunAsync();
+            await Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((ctx, builder) =>
+                {
+                    builder
+                        .AddJsonFile("appsettings.json", true, true)
+                        .AddEnvironmentVariables()
+                        .AddCommandLine(args);
+                })
+                .ConfigureServices((ctx, services) => { ConfigureServices(services, ctx.Configuration); })
+                .Build()
+                .RunAsync();
         }
         catch (Exception ex)
         {
             AnsiConsole.WriteException(ex);
             return -1;
         }
-        finally
-        {
-            // Clear the static reference when done
-            ServiceProvider = null;
-        }
+
+        return 0;
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHostedService<InteractiveApplication>();
+        services.AddSlimMessageBus(mbb =>
+        {
+            mbb.Produce<ShutdownCommand>(x => x.DefaultTopic(nameof(ShutdownCommand)));
+            mbb.Consume<ShutdownCommand>(x => x.Topic(nameof(ShutdownCommand)));
+            mbb.Produce<KeyInputMessage>(x => x.DefaultTopic(nameof(KeyInputMessage)));
+            mbb.Consume<KeyInputMessage>(x => x.Topic(nameof(KeyInputMessage)));
+            mbb.Produce<ShowHotKeysCommand>(x => x.DefaultTopic(nameof(ShowHotKeysCommand)));
+            mbb.Consume<ShowHotKeysCommand>(x => x.Topic(nameof(ShowHotKeysCommand)));
+            mbb.Produce<OpenPreferencesCommand>(x => x.DefaultTopic(nameof(OpenPreferencesCommand)));
+            mbb.Consume<OpenPreferencesCommand>(x => x.Topic(nameof(OpenPreferencesCommand)));
+            mbb.Produce<StatusMessage>(x => x.DefaultTopic(nameof(StatusMessage)));
+            mbb.Consume<StatusMessage>(x => x.Topic(nameof(StatusMessage)));
+            mbb.WithProviderMemory();
+            mbb.AddJsonSerializer();
+        });
+
         services.AddSingleton(configuration);
 
         services.AddLogging(builder =>
@@ -93,10 +106,15 @@ internal sealed class Program
         services.AddSingleton<ILocalizationService, AppLocalizationService>();
 
         services.AddSingleton<ScreenLayout>();
-        services.AddSingleton<IScreen, Screen>();
+        services.AddSingleton<Screen>();
+        services.AddSingleton<IScreen>(x => x.GetRequiredService<Screen>());
+        services.AddSingleton<IConsumer<StatusMessage>>(x => x.GetRequiredService<Screen>());
+        services.AddSingleton<IConsumer<ShowHotKeysCommand>>(x => x.GetRequiredService<Screen>());
+        services.AddSingleton<IConsumer<OpenPreferencesCommand>>(x => x.GetRequiredService<Screen>());
         services.AddSingleton<PreferencesPage>();
         services.AddSingleton<HotKeyPage>();
         services.AddSingleton<HotKeyService>();
-        services.AddSingleton<InteractiveApplication>();
+        services.AddSingleton<IConsumer<KeyInputMessage>>(x => x.GetRequiredService<HotKeyService>());
+        services.AddSingleton<IConsumer<ShutdownCommand>, ShutdownService>();
     }
 }

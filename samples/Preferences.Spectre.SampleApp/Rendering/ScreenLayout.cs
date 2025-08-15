@@ -1,15 +1,15 @@
 // Copyright (c) 2025 Christopher Schuetz
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -60,47 +60,40 @@ public class ScreenLayout
         _logger.LogExit();
     }
 
-    public IRenderable GetSectionHeader(string title, string? description = null)
+    public IRenderable GetHeader(string title)
     {
-        return new Panel(CreateHeaderContent(title, description))
-        {
-            Border = BoxBorder.Double,
-            BorderStyle = GetPrimaryStyle(),
-            Padding = new Padding(2, 1)
-        };
+        return new Rule(title) { Style = GetPrimaryStyle() };
     }
 
     public IRenderable GetSubHeader(string title)
     {
-        var subHeader = new Markup(title, GetSecondaryStyle());
-        var rule = new Rule { Style = GetMutedStyle() };
-        return new Rows(subHeader, rule);
+        return new Rule(title) { Style = GetSecondaryStyle() };
     }
 
-    public IRenderable GetThinSeparator()
+    public Renderable GetContent(string title)
     {
-        return new Rule { Style = GetBorderStyle() };
+        return new Text(title, GetInfoStyle());
+    }
+
+    public Renderable GetSelectedContent(string title)
+    {
+        return new Text(title, GetSelectedStyle());
     }
 
     public void RenderMainContent(IRenderable? currentPageContent)
     {
-        Console.SetCursorPosition(0, 3);
-        AnsiConsole.Write(currentPageContent ?? new Markup("No content", GetMutedStyle()));;
+        Console.SetCursorPosition(0, 1);
+        AnsiConsole.Write(currentPageContent ?? new Markup("No content", GetMutedStyle()));
+        ;
 
-        (_, int row) = Console.GetCursorPosition();
-        for (var i = row; i < Console.WindowHeight - 6; i++)
-        {
-            AnsiConsole.WriteLine();
-        }
+        var (_, row) = Console.GetCursorPosition();
+        for (var i = row; i < Console.WindowHeight - 5; i++) AnsiConsole.WriteLine();
     }
 
     public void ClearMainContent()
     {
-        Console.SetCursorPosition(0, 3);
-        for (var i = 0; i < Console.WindowHeight - 6; i++)
-        {
-            AnsiConsole.WriteLine();
-        }
+        Console.SetCursorPosition(0, 1);
+        for (var i = 0; i < Console.WindowHeight - 5; i++) AnsiConsole.WriteLine();
     }
 
     public void RenderStatusBar(string hint, string status, StatusMessageType statusType)
@@ -111,14 +104,14 @@ public class ScreenLayout
         content.AddColumn(new GridColumn().NoWrap());
 
         content.AddRow(
-            new Markup(hint, new Style(Color.FromConsoleColor(CurrentTheme.MutedColor))),
-            new Markup(status, new Style(GetStatusColor(statusType)))
+            new Markup(hint, GetMutedStyle()),
+            new Markup(status, GetStatusStyle(statusType))
         );
 
         var panel = new Panel(content)
         {
             Border = BoxBorder.Rounded,
-            BorderStyle = new Style(Color.FromConsoleColor(CurrentTheme.BorderColor)),
+            BorderStyle = GetBorderStyle(),
             Padding = new Padding(1, 0)
         };
 
@@ -136,44 +129,14 @@ public class ScreenLayout
             _ => Theme.CreateDarkTheme()
         };
 
+        AnsiConsole.Background = Color.FromConsoleColor(CurrentTheme.BackgroundColor);
         _logger.LogInformation("Theme updated to: {ThemeName}", themeName);
-    }
-
-    private Color GetStatusColor(StatusMessageType messageType)
-    {
-        return messageType switch
-        {
-            StatusMessageType.Info => Color.FromConsoleColor(CurrentTheme.InfoColor),
-            StatusMessageType.Success => Color.FromConsoleColor(CurrentTheme.SuccessColor),
-            StatusMessageType.Warning => Color.FromConsoleColor(CurrentTheme.WarningColor),
-            StatusMessageType.Error => Color.FromConsoleColor(CurrentTheme.ErrorColor),
-            _ => Color.FromConsoleColor(CurrentTheme.MutedColor)
-        };
     }
 
     private void AddVerticalSpace(int lines)
     {
-        for (var i = 0; i < lines; i++)
-        {
-            AnsiConsole.WriteLine();
-        }
+        for (var i = 0; i < lines; i++) AnsiConsole.WriteLine();
     }
-
-    private IRenderable CreateHeaderContent(string title, string? description)
-    {
-        var content = new List<IRenderable>
-        {
-            new Markup(title, GetPrimaryStyle())
-        };
-
-        if (!string.IsNullOrEmpty(description))
-        {
-            content.Add(new Markup(description, GetMutedStyle()));
-        }
-
-        return new Rows(content);
-    }
-
 
     private Style GetPrimaryStyle()
     {
@@ -197,5 +160,31 @@ public class ScreenLayout
     {
         return new Style(Color.FromConsoleColor(CurrentTheme.BorderColor),
             Color.FromConsoleColor(CurrentTheme.BackgroundColor));
+    }
+
+    private Style GetInfoStyle()
+    {
+        return new Style(Color.FromConsoleColor(CurrentTheme.InfoColor),
+            Color.FromConsoleColor(CurrentTheme.BackgroundColor));
+    }
+
+    private Style GetSelectedStyle()
+    {
+        return new Style(Color.FromConsoleColor(CurrentTheme.InfoColor),
+            Color.FromConsoleColor(CurrentTheme.MutedColor));
+    }
+
+    private Style GetStatusStyle(StatusMessageType messageType)
+    {
+        var color = messageType switch
+        {
+            StatusMessageType.Info => Color.FromConsoleColor(CurrentTheme.InfoColor),
+            StatusMessageType.Success => Color.FromConsoleColor(CurrentTheme.SuccessColor),
+            StatusMessageType.Warning => Color.FromConsoleColor(CurrentTheme.WarningColor),
+            StatusMessageType.Error => Color.FromConsoleColor(CurrentTheme.ErrorColor),
+            _ => Color.FromConsoleColor(CurrentTheme.MutedColor)
+        };
+
+        return new Style(color, Color.FromConsoleColor(CurrentTheme.BackgroundColor));
     }
 }

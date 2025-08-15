@@ -1,15 +1,15 @@
 // Copyright (c) 2025 Christopher Schuetz
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,9 +27,9 @@ namespace Preferences.Common.Services;
 
 public class HotKeyService : IConsumer<KeyInputMessage>
 {
+    private readonly IMessageBus _bus;
     private readonly ILogger<HotKeyService> _logger;
     private readonly IOptionsMonitor<PreferencesOptions> _options;
-    private readonly IMessageBus _bus;
 
     public HotKeyService(
         ILogger<HotKeyService> logger,
@@ -46,16 +46,18 @@ public class HotKeyService : IConsumer<KeyInputMessage>
         try
         {
             var hotKeys = _options.CurrentValue.Sections.First(section =>
-            section.Name.Equals("Preferences.HotKeys", StringComparison.OrdinalIgnoreCase));
-            var hotKey = hotKeys.Entries.First(e =>
+                section.Name.Equals("Preferences.HotKeys", StringComparison.Ordinal));
+            var hotKey = hotKeys.Entries.FirstOrDefault(e =>
                 e.Value.Equals(CreateHotkeyString(message.KeyInfo), StringComparison.Ordinal));
-            await _bus.Publish(message: CreateHotKeyMessage(hotKey.Name), cancellationToken: cancellationToken);
+            if (hotKey == null) return;
+
+            await _bus.Publish(CreateHotKeyMessage(hotKey.Name), cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error handling key input");
             await _bus.Publish(
-                message: new StatusMessage($"Error: {ex.Message}", StatusMessageType.Error),
+                new StatusMessage($"Error: {ex.Message}", StatusMessageType.Error),
                 cancellationToken: CancellationToken.None);
         }
     }
@@ -76,20 +78,11 @@ public class HotKeyService : IConsumer<KeyInputMessage>
     {
         var parts = new List<string>();
 
-        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
-        {
-            parts.Add("Ctrl");
-        }
+        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control)) parts.Add("Ctrl");
 
-        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Alt))
-        {
-            parts.Add("Alt");
-        }
+        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Alt)) parts.Add("Alt");
 
-        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift))
-        {
-            parts.Add("Shift");
-        }
+        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift)) parts.Add("Shift");
 
         parts.Add(keyInfo.Key.ToString());
 

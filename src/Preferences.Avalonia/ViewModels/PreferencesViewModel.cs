@@ -19,24 +19,23 @@
 // SOFTWARE.
 
 using Preferences.Common;
+using Preferences.Common.Services;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.ViewModels;
 
 /// <summary>
-/// Represents a view model for managing preferences UI, coordinating sections and their entries.
+///     Represents a view model for managing preferences UI, coordinating sections and their entries.
 /// </summary>
 /// <remarks>
-/// This class serves as the main view model for the preferences window, maintaining a collection of
-/// <see cref="SectionViewModel"/> instances organized by their order property. It provides reactive 
-/// property change notifications through ReactiveUI for UI binding.
-/// 
-/// The view model is initialized with a <see cref="PreferencesOptions"/> that contains the underlying
-/// preference data structure, and an optional <see cref="ILocalizationService"/> for localizing 
-/// section and entry titles.
-/// 
-/// It tracks the currently selected section to facilitate navigation between different preference
-/// categories in the UI.
+///     This class serves as the main view model for the preferences window, maintaining a collection of
+///     <see cref="SectionViewModel" /> instances organized by their order property. It provides reactive
+///     property change notifications through ReactiveUI for UI binding.
+///     The view model is initialized with a <see cref="PreferencesOptions" /> that contains the underlying
+///     preference data structure, and an optional <see cref="ILocalizationService" /> for localizing
+///     section and entry titles.
+///     It tracks the currently selected section to facilitate navigation between different preference
+///     categories in the UI.
 /// </remarks>
 public class PreferencesViewModel : ReactiveObject
 {

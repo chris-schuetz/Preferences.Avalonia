@@ -1,15 +1,15 @@
 // Copyright (c) 2025 Christopher Schuetz
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,6 +21,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Preferences.Common;
+using Preferences.Common.Services;
 using Preferences.Spectre.SampleApp.Rendering;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -43,70 +44,16 @@ public class HotKeyPage : IPage
         _localizationService = localizationService;
     }
 
-    public IRenderable? Draw(ScreenLayout screenLayout, IScreen screen)
+    public IRenderable Draw(ScreenLayout screenLayout)
     {
-        try
-        {
-            _logger.LogDebug("Showing hot keys");
+        var rows = new List<IRenderable>
+            { screenLayout.GetHeader(_localizationService.GetLocalizedString("Preferences")) };
 
-            var preferences = _options.CurrentValue;
-            if (preferences?.Sections == null)
-            {
-                screen.Warning("No preferences configuration found");
-                return null;
-            }
+        var hotKeys = _options.CurrentValue.Sections.First(s => s.Name == "Preferences.HotKeys");
+        rows.Add(screenLayout.GetSubHeader(_localizationService.GetLocalizedString(hotKeys.Name)));
+        foreach (var entry in hotKeys.Entries)
+            rows.Add(screenLayout.GetContent($"{_localizationService.GetLocalizedString(entry.Name)}: {entry.Value}"));
 
-            // Find all sections that contain hotkey entries
-            var hotKeySections = preferences.Sections
-                .Where(section => section.Name.Contains("HotKey", StringComparison.OrdinalIgnoreCase) ||
-                                  section.Entries.Any(entry =>
-                                      entry.Name.Contains("HotKey", StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-
-            if (!hotKeySections.Any())
-            {
-                screen.Warning("No hotkey configuration found in preferences");
-                return null;
-            }
-
-            _renderer.RenderSectionHeader("Keyboard Shortcuts", "Available hot keys and shortcuts");
-            _renderer.AddVerticalSpace(1);
-            _renderer.RenderInfoMessage("Application shortcuts:");
-            _renderer.AddVerticalSpace(1);
-
-            // Display active shortcuts table
-            var shortcutsTable = new Table();
-            shortcutsTable.Border(TableBorder.Rounded);
-            shortcutsTable.BorderColor(Color.FromConsoleColor(_renderer.CurrentTheme.BorderColor));
-
-            // Add columns
-            shortcutsTable.AddColumn(new TableColumn("Shortcut").Centered());
-            shortcutsTable.AddColumn(new TableColumn("Action").LeftAligned());
-
-            // No hardcoded shortcuts - all shortcuts come from preferences
-
-            // Process all hotkey entries from all sections
-            foreach (var section in hotKeySections)
-            {
-                foreach (var entry in section.Entries.Where(e => !string.IsNullOrEmpty(e.Value)))
-                {
-                    var actionDescription = _localizationService.GetLocalizedString(entry.Name);
-                    var keyMarkup = $"[{_renderer.CurrentTheme.Primary}]{entry.Value}[/]";
-                    var actionMarkup = $"[{_renderer.CurrentTheme.Success}]{actionDescription}[/]";
-                    shortcutsTable.AddRow(keyMarkup, actionMarkup);
-                }
-            }
-
-            AnsiConsole.Write(shortcutsTable);
-
-            _renderer.AddVerticalSpace(2);
-            _renderer.RenderInfoMessage("Press any key to return...");
-            Console.ReadKey(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error showing hot keys");
-            screen.Error($"Failed to show hot keys: {ex.Message}");
-        }
+        return new Rows(rows);
     }
 }

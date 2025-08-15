@@ -1,15 +1,15 @@
 // Copyright (c) 2025 Christopher Schuetz
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,85 +18,62 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Preferences.Common.Messages;
 using Preferences.Common.SampleApp;
-using Preferences.Common.Services;
-using Preferences.Spectre.SampleApp.Pages;
 using Preferences.Spectre.SampleApp.Rendering;
 using SlimMessageBus;
-using Spectre.Console;
 
 namespace Preferences.Spectre.SampleApp;
 
-public class InteractiveApplication : IConsumer<ShutdownCommand>
+public class InteractiveApplication : IHostedService
 {
-    private readonly HotKeyPage _hotKeyPage;
-    private readonly ILogger<InteractiveApplication> _logger;
-    private readonly PreferencesPage _preferencesPage;
     private readonly IMessageBus _bus;
-    private bool _isRunning;
+    private readonly ILogger<InteractiveApplication> _logger;
+    private readonly IScreen _screen;
+    private volatile bool _canRun;
 
     public InteractiveApplication(
         ILogger<InteractiveApplication> logger,
         IMessageBus bus,
-        PreferencesPage preferencesPage,
-        HotKeyPage hotKeyPage)
+        IScreen screen)
     {
         _logger = logger;
         _bus = bus;
-        _preferencesPage = preferencesPage;
-        _hotKeyPage = hotKeyPage;
-        _isRunning = false;
+        _screen = screen;
     }
 
-    public async Task<int> RunAsync()
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            _logger.LogEntry();
+        _logger.LogEntry();
+        Initialize();
+        _ = Task.Factory.StartNew(
+            RunMainLoopAsync,
+            CancellationToken.None,
+            TaskCreationOptions.LongRunning,
+            TaskScheduler.Default);
+        return Task.CompletedTask;
+    }
 
-            Initialize();
-            await RunMainLoopAsync();
-
-            return 0;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Application error occurred");
-            return -1;
-        }
-        finally
-        {
-            AnsiConsole.Clear();
-            _logger.LogExit();
-        }
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _canRun = false;
+        return Task.CompletedTask;
     }
 
     private void Initialize()
     {
         _logger.LogEntry();
-        _isRunning = true;
+        _canRun = true;
 
         try
         {
-            _logger.LogTrace("Attempting to get theme entry...");
-            var themeEntry = _preferencesPage.GetEntry("Preferences.General", "Preferences.General.Theme");
-            _logger.LogDebug("Theme entry: {ThemeEntry}", themeEntry?.Value ?? "null");
-
-            if (themeEntry?.Value != null)
-            {
-                _logger.LogTrace("Updating theme to: {ThemeEntry}", themeEntry.Value);
-                _screen.UpdateTheme(themeEntry.Value);
-                _logger.LogDebug("Theme updated successfully");
-            }
-            else
-            {
-                _logger.LogDebug("No theme entry found, using default theme");
-            }
-
             _logger.LogTrace("Initializing screen layout...");
             _screen.InitializeLayout();
+            _screen.Title = "Spectre Sample Application";
+            _screen.StatusBarHintText = "Press F1 for help";
+            _bus.Publish(new StatusMessage("Ready", StatusMessageType.Success));
         }
         catch (Exception ex)
         {
@@ -110,19 +87,12 @@ public class InteractiveApplication : IConsumer<ShutdownCommand>
 
     private async Task RunMainLoopAsync()
     {
-        while (_isRunning)
+        while (_canRun)
         {
             _screen.RenderLayout();
 
             var keyInfo = Console.ReadKey(true);
-            await _bus.Publish(message: new KeyInputMessage(keyInfo), cancellationToken: CancellationToken.None);
+            await _bus.Publish(new KeyInputMessage(keyInfo), cancellationToken: CancellationToken.None);
         }
-    }
-
-    public Task OnHandle(ShutdownCommand command, CancellationToken cancellationToken)
-    {
-        _logger.LogDebug("Exit requested");
-        _isRunning = false;
-        return Task.CompletedTask;
     }
 }

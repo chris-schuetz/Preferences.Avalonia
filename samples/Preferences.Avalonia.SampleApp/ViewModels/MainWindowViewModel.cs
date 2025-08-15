@@ -29,6 +29,7 @@ using Microsoft.Extensions.Options;
 using Preferences.Avalonia.ViewModels;
 using Preferences.Common;
 using Preferences.Common.SampleApp;
+using Preferences.Common.Services;
 using ReactiveUI;
 
 namespace Preferences.Avalonia.SampleApp.ViewModels;
@@ -115,11 +116,11 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     public IInteraction<Unit, Unit> HideOverlay { get; } = new Interaction<Unit, Unit>();
-    
+
     public ICommand CloseOverlay { get; }
 
     public IInteraction<Unit, Unit> ExitApplication { get; } = new Interaction<Unit, Unit>();
-    
+
     public ICommand ExecuteExitApplication { get; }
 
     public KeyGesture? ExitApplicationGesture
@@ -132,13 +133,10 @@ public class MainWindowViewModel : ViewModelBase
                 : null;
         }
     }
-    
+
     private void ApplyTheme()
     {
-        if (Application.Current == null)
-        {
-            return;
-        }
+        if (Application.Current == null) return;
 
         Application.Current.RequestedThemeVariant = PreferencesOptions.Sections
                 .FirstOrDefault(s => s.Name == "Preferences.General")?.Entries
