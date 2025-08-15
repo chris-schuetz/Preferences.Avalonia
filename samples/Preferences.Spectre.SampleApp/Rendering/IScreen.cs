@@ -18,22 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Common;
+using Preferences.Common.Messages;
 
-/// <summary>
-///     Interface for providing localized strings to the Preferences.Avalonia library
-/// </summary>
-public interface ILocalizationService
+namespace Preferences.Spectre.SampleApp.Rendering;
+
+public interface IScreen
 {
-    /// <summary>
-    ///     Gets a localized string for the specified resource key
-    /// </summary>
-    /// <param name="resourceKey">The resource key to look up</param>
-    /// <returns>The localized string or the key itself if no translation was found</returns>
-    string GetLocalizedString(string resourceKey);
-
-    /// <summary>
-    ///     Event that is triggered when the locale changes
-    /// </summary>
-    event EventHandler LocaleChanged;
+    string StatusBarStatusText { get; set; }
+    string StatusBarHintText { get; set; }
+    StatusMessageType StatusBarStatusMessageType { get; set; }
+    string Title { get; set; }
+    void UpdateTheme(string themeName);
+    void InitializeLayout();
+    void RenderLayout();
 }

@@ -21,10 +21,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Preferences.Common;
 using Preferences.Common.SampleApp.Services;
-using Preferences.Spectre.SampleApp.Services;
+using Preferences.Common.Services;
+using Preferences.Spectre.SampleApp.Pages;
+using Preferences.Spectre.SampleApp.Rendering;
 using Spectre.Console;
 using ZLogger;
 
@@ -39,48 +40,24 @@ internal sealed class Program
     {
         try
         {
-            Console.WriteLine("Starting application...");
-
-            // Build configuration
-            Console.WriteLine("Building configuration...");
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", true, true)
                 .AddEnvironmentVariables()
                 .AddCommandLine(args)
                 .Build();
 
-            Console.WriteLine("Configuration built successfully.");
-
-            // Build service collection
-            Console.WriteLine("Configuring services...");
             var services = new ServiceCollection();
             ConfigureServices(services, configuration);
 
-            Console.WriteLine("Services configured successfully.");
-
-            // Build service provider
-            Console.WriteLine("Building service provider...");
             using var serviceProvider = services.BuildServiceProvider();
-
-            // Store the service provider for static access
             ServiceProvider = serviceProvider;
 
-            Console.WriteLine("Service provider built successfully.");
-
-            // Get the interactive application service
-            Console.WriteLine("Getting InteractiveApplication service...");
             var app = serviceProvider.GetRequiredService<InteractiveApplication>();
 
-            Console.WriteLine("InteractiveApplication service obtained successfully.");
-
-            // Run the interactive application
-            Console.WriteLine("Starting interactive application...");
             return await app.RunAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fatal error in Main: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             AnsiConsole.WriteException(ex);
             return -1;
         }
@@ -93,61 +70,33 @@ internal sealed class Program
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        try
-        {
-            Console.WriteLine("  Adding configuration...");
-            // Add configuration
-            services.AddSingleton(configuration);
+        services.AddSingleton(configuration);
 
-            Console.WriteLine("  Adding logging...");
-            // Add logging
-            services.AddLogging(builder =>
+        services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddZLoggerConsole(options =>
             {
-                builder.ClearProviders();
-                builder.SetMinimumLevel(LogLevel.Information);
-                builder.AddZLoggerConsole(options =>
+                options.UsePlainTextFormatter(formatter =>
                 {
-                    options.UsePlainTextFormatter(formatter =>
-                    {
-                        formatter.SetPrefixFormatter($"[{0:HH:mm:ss}] ",
-                            (in MessageTemplate template, in LogInfo info) => template.Format(info.Timestamp.Utc.DateTime));
-                    });
+                    formatter.SetPrefixFormatter($"[{0:HH:mm:ss}] ",
+                        (in MessageTemplate template, in LogInfo info) =>
+                            template.Format(info.Timestamp.Utc.DateTime));
                 });
             });
+        });
 
-            Console.WriteLine("  Adding preferences configuration...");
-            // Add preferences configuration
-            services.Configure<PreferencesOptions>(options =>
-                configuration.GetSection(PreferencesOptions.Preferences).Bind(options));
+        services.Configure<PreferencesOptions>(options =>
+            configuration.GetSection(PreferencesOptions.Preferences).Bind(options));
 
-            Console.WriteLine("  Adding common services...");
-            // Add common services
-            services.AddSingleton<ILocalizationService, AppLocalizationService>();
+        services.AddSingleton<ILocalizationService, AppLocalizationService>();
 
-            Console.WriteLine("  Adding Spectre.Console services...");
-            // Add Spectre.Console services
-            Console.WriteLine("    Adding ConsoleRenderer...");
-            services.AddSingleton<ConsoleRenderer>();
-
-            Console.WriteLine("    Adding ScreenManager...");
-            services.AddSingleton<ScreenManager>();
-
-            Console.WriteLine("    Adding PreferencesManagerService...");
-            services.AddSingleton<PreferencesManagerService>();
-
-            Console.WriteLine("    Adding HotKeyService...");
-            services.AddSingleton<HotKeyService>();
-
-            Console.WriteLine("    Adding InteractiveApplication...");
-            services.AddSingleton<InteractiveApplication>();
-
-            Console.WriteLine("  All services configured successfully.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in ConfigureServices: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            throw;
-        }
+        services.AddSingleton<ScreenLayout>();
+        services.AddSingleton<IScreen, Screen>();
+        services.AddSingleton<PreferencesPage>();
+        services.AddSingleton<HotKeyPage>();
+        services.AddSingleton<HotKeyService>();
+        services.AddSingleton<InteractiveApplication>();
     }
 }

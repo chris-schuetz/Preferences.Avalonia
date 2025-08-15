@@ -18,21 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Spectre.SampleApp.Services;
+namespace Preferences.Spectre.SampleApp.Rendering;
 
-public class ConsoleTheme
+public class Theme
 {
-    public string Primary { get; set; } = "blue";
-    public string Secondary { get; set; } = "cyan";
-    public string Success { get; set; } = "green";
-    public string Warning { get; set; } = "yellow";
-    public string Error { get; set; } = "red";
-    public string Info { get; set; } = "white";
-    public string Muted { get; set; } = "grey";
-    public string Border { get; set; } = "grey";
-    public string Background { get; set; } = "black";
-
-    // ConsoleColor properties for Spectre.Console Style objects
     public ConsoleColor PrimaryColor { get; set; } = ConsoleColor.Blue;
     public ConsoleColor SecondaryColor { get; set; } = ConsoleColor.Cyan;
     public ConsoleColor SuccessColor { get; set; } = ConsoleColor.Green;
@@ -43,20 +32,10 @@ public class ConsoleTheme
     public ConsoleColor BorderColor { get; set; } = ConsoleColor.Gray;
     public ConsoleColor BackgroundColor { get; set; } = ConsoleColor.Black;
 
-    public static ConsoleTheme CreateLightTheme()
+    public static Theme CreateLightTheme()
     {
-        return new ConsoleTheme
+        return new Theme
         {
-            Primary = "blue",
-            Secondary = "navy",
-            Success = "darkgreen",
-            Warning = "orange3",
-            Error = "red",
-            Info = "black",
-            Muted = "grey",
-            Border = "grey",
-            Background = "white",
-
             PrimaryColor = ConsoleColor.Blue,
             SecondaryColor = ConsoleColor.DarkBlue,
             SuccessColor = ConsoleColor.DarkGreen,
@@ -69,49 +48,12 @@ public class ConsoleTheme
         };
     }
 
-    public static ConsoleTheme CreateDarkTheme()
+    public static Theme CreateDarkTheme()
     {
-        return new ConsoleTheme
+        return new Theme
         {
-            Primary = "cyan",
-            Secondary = "blue",
-            Success = "green",
-            Warning = "yellow",
-            Error = "red",
-            Info = "white",
-            Muted = "grey",
-            Border = "grey",
-            Background = "black",
-
             PrimaryColor = ConsoleColor.Cyan,
             SecondaryColor = ConsoleColor.Blue,
-            SuccessColor = ConsoleColor.Green,
-            WarningColor = ConsoleColor.Yellow,
-            ErrorColor = ConsoleColor.Red,
-            InfoColor = ConsoleColor.White,
-            MutedColor = ConsoleColor.Gray,
-            BorderColor = ConsoleColor.Gray,
-            BackgroundColor = ConsoleColor.Black
-        };
-    }
-
-    public static ConsoleTheme CreateSystemTheme()
-    {
-        // For system theme, we'll use a balanced approach that works well in both light and dark terminals
-        return new ConsoleTheme
-        {
-            Primary = "blue",
-            Secondary = "cyan",
-            Success = "green",
-            Warning = "yellow",
-            Error = "red",
-            Info = "white",
-            Muted = "grey",
-            Border = "grey",
-            Background = "black",
-
-            PrimaryColor = ConsoleColor.Blue,
-            SecondaryColor = ConsoleColor.Cyan,
             SuccessColor = ConsoleColor.Green,
             WarningColor = ConsoleColor.Yellow,
             ErrorColor = ConsoleColor.Red,

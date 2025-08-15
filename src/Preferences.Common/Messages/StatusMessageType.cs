@@ -18,22 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Common;
+using System.ComponentModel;
 
-/// <summary>
-///     Interface for providing localized strings to the Preferences.Avalonia library
-/// </summary>
-public interface ILocalizationService
+namespace Preferences.Common.Messages;
+
+public enum StatusMessageType
 {
-    /// <summary>
-    ///     Gets a localized string for the specified resource key
-    /// </summary>
-    /// <param name="resourceKey">The resource key to look up</param>
-    /// <returns>The localized string or the key itself if no translation was found</returns>
-    string GetLocalizedString(string resourceKey);
-
-    /// <summary>
-    ///     Event that is triggered when the locale changes
-    /// </summary>
-    event EventHandler LocaleChanged;
+    [Browsable(false)] Undefined,
+    Info,
+    Success,
+    Warning,
+    Error
 }

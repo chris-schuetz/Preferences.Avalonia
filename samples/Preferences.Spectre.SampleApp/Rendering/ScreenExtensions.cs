@@ -1,15 +1,15 @@
 // Copyright (c) 2025 Christopher Schuetz
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,22 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Common;
+using Preferences.Common.Messages;
 
-/// <summary>
-///     Interface for providing localized strings to the Preferences.Avalonia library
-/// </summary>
-public interface ILocalizationService
+namespace Preferences.Spectre.SampleApp.Rendering;
+
+public static class ScreenExtensions
 {
-    /// <summary>
-    ///     Gets a localized string for the specified resource key
-    /// </summary>
-    /// <param name="resourceKey">The resource key to look up</param>
-    /// <returns>The localized string or the key itself if no translation was found</returns>
-    string GetLocalizedString(string resourceKey);
+    public static void Success(this IScreen screen, string message)
+    {
+        screen.StatusBarStatusMessageType = StatusMessageType.Success;
+        screen.StatusBarStatusText = message;
+    }
 
-    /// <summary>
-    ///     Event that is triggered when the locale changes
-    /// </summary>
-    event EventHandler LocaleChanged;
+    public static void Error(this IScreen screen, string message)
+    {
+        screen.StatusBarStatusMessageType = StatusMessageType.Error;
+        screen.StatusBarStatusText = message;
+    }
+
+    public static void Warning(this IScreen screen, string message)
+    {
+        screen.StatusBarStatusMessageType = StatusMessageType.Warning;
+        screen.StatusBarStatusText = message;
+    }
+
+    public static void Info(this IScreen screen, string message)
+    {
+        screen.StatusBarStatusMessageType = StatusMessageType.Info;
+        screen.StatusBarStatusText = message;
+    }
 }

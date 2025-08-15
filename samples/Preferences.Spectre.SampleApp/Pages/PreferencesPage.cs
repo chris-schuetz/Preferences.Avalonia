@@ -21,30 +21,31 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Preferences.Common;
-using Preferences.Common.SampleApp.Services;
+using Preferences.Common.SampleApp;
+using Preferences.Spectre.SampleApp.Rendering;
 using Spectre.Console;
 
-namespace Preferences.Spectre.SampleApp.Services;
+namespace Preferences.Spectre.SampleApp.Pages;
 
-public class PreferencesManagerService
+public class PreferencesPage : IPage
 {
-    private readonly ILogger<PreferencesManagerService> _logger;
-    private readonly ConsoleRenderer _renderer;
-    private readonly IOptionsSnapshot<PreferencesOptions> _preferencesOptions;
     private readonly ILocalizationService _localizationService;
+    private readonly ILogger<PreferencesPage> _logger;
+    private readonly IOptionsMonitor<PreferencesOptions> _preferencesOptions;
+    private readonly IScreen _screen;
 
-    public PreferencesManagerService(
-        ILogger<PreferencesManagerService> logger,
-        ConsoleRenderer renderer,
-        IOptionsSnapshot<PreferencesOptions> preferencesOptions,
+    public PreferencesPage(
+        ILogger<PreferencesPage> logger,
+        IScreen screen,
+        IOptionsMonitor<PreferencesOptions> preferencesOptions,
         ILocalizationService localizationService)
     {
-        Console.WriteLine("PreferencesManagerService constructor called");
         _logger = logger;
-        _renderer = renderer;
+        _screen = screen;
+        _logger.LogTrace("PreferencesManagerService constructor called");
         _preferencesOptions = preferencesOptions;
         _localizationService = localizationService;
-        Console.WriteLine("PreferencesManagerService constructor completed");
+        _logger.LogInformation("PreferencesManagerService constructor completed");
     }
 
     public async Task OpenPreferencesEditorAsync()
@@ -53,26 +54,21 @@ public class PreferencesManagerService
         {
             _logger.LogDebug("Opening preferences editor");
 
-            var preferences = _preferencesOptions.Value;
+            var preferences = _preferencesOptions.CurrentValue;
 
             if (preferences?.Sections == null || !preferences.Sections.Any())
             {
-                _renderer.ClearScreen();
-                _renderer.RenderSectionHeader("Preferences Editor", "Configure application preferences");
-                _renderer.RenderWarningMessage("No preferences sections found.");
-                _renderer.PauseForUser();
+                _screen.Warning("No preferences sections found.");
                 return;
             }
 
             // Start hierarchical navigation
             await NavigatePreferencesHierarchyAsync(preferences.Sections);
-
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening preferences editor");
-            _renderer.RenderErrorMessage($"Failed to open preferences editor: {ex.Message}");
-            _renderer.PauseForUser();
+            _screen.Error($"Failed to open preferences editor: {ex.Message}");
         }
     }
 
@@ -91,14 +87,14 @@ public class PreferencesManagerService
                 // User cancelled - exit without saving any unsaved changes
                 if (hasUnsavedChanges)
                 {
-                    _renderer.ClearScreen();
-                    _renderer.RenderSectionHeader("Preferences Editor", "Cancelled");
-                    _renderer.RenderWarningMessage("All changes have been discarded.");
-                    _renderer.PauseForUser();
+                    _screen.StatusBarHintText = "All changes have been discarded.";
+                    _screen.StatusBarStatusMessageType = MessageType.Info;
                 }
+
                 break;
             }
-            else if (selectionResult.ChoiceType == SectionChoiceType.SaveAndExit)
+
+            if (selectionResult.ChoiceType == SectionChoiceType.SaveAndExit)
             {
                 // User chose to save and exit
                 if (hasUnsavedChanges)
@@ -106,24 +102,24 @@ public class PreferencesManagerService
                     try
                     {
                         await SaveChangesToFileAsync();
-                        ApplyThemeChanges();
+                        // TODO update theme if changed
 
-                        _renderer.ClearScreen();
-                        _renderer.RenderSectionHeader("Preferences Editor", "Saved Successfully");
-                        _renderer.RenderSuccessMessage("All changes have been saved to appsettings.json");
-                        _renderer.PauseForUser();
+                        _screen.StatusBarHintText = "All changes have been saved to appsettings.json";
+                        _screen.StatusBarStatusMessageType = MessageType.Success;
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error saving preferences");
-                        _renderer.RenderErrorMessage($"Failed to save preferences: {ex.Message}");
-                        _renderer.PauseForUser();
+                        _screen.StatusBarHintText = $"Failed to save preferences: {ex.Message}";
+                        _screen.StatusBarStatusMessageType = MessageType.Error;
                         continue; // Go back to section selection
                     }
                 }
+
                 break;
             }
-            else if (selectionResult.Section != null)
+
+            if (selectionResult.Section != null)
             {
                 // User selected a section to edit
                 var sectionChanges = await NavigateSectionEntriesAsync(selectionResult.Section);
@@ -132,14 +128,15 @@ public class PreferencesManagerService
         }
     }
 
-    private async Task<SectionSelectionResult> SelectSectionAsync(List<PreferencesSection> sections, bool hasUnsavedChanges)
+    private async Task<SectionSelectionResult> SelectSectionAsync(List<PreferencesSection> sections,
+        bool hasUnsavedChanges)
     {
-        _renderer.ClearScreen();
         _renderer.RenderSectionHeader("Preferences Editor", "Select a section to configure");
 
         // Create choices for section selection
         var sectionChoices = sections
-            .Select(s => new SectionChoice(s, _localizationService.GetLocalizedString(s.Name), SectionChoiceType.Section))
+            .Select(s =>
+                new SectionChoice(s, _localizationService.GetLocalizedString(s.Name), SectionChoiceType.Section))
             .ToList();
 
         // Add exit options
@@ -156,7 +153,7 @@ public class PreferencesManagerService
         try
         {
             var selectedChoice = _renderer.PromptForChoice(
-                "Select a preferences section:", 
+                "Select a preferences section:",
                 sectionChoices);
 
             return new SectionSelectionResult(selectedChoice.Section, selectedChoice.ChoiceType);
@@ -164,7 +161,7 @@ public class PreferencesManagerService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in section selection");
-            _renderer.RenderErrorMessage($"Error selecting section: {ex.Message}");
+            _screen.Error($"Error selecting section: {ex.Message}");
             return new SectionSelectionResult(null, SectionChoiceType.Cancel);
         }
     }
@@ -198,8 +195,7 @@ public class PreferencesManagerService
 
     private async Task<PreferencesEntry?> SelectEntryAsync(PreferencesSection section, string sectionName)
     {
-        _renderer.ClearScreen();
-        _renderer.RenderSectionHeader($"Preferences Editor - {sectionName}", 
+        _renderer.RenderSectionHeader($"Preferences Editor - {sectionName}",
             "Select an entry to edit");
 
         if (section.Entries?.Any() != true)
@@ -224,7 +220,7 @@ public class PreferencesManagerService
         try
         {
             var selectedChoice = _renderer.PromptForChoice(
-                "Select an entry to edit:", 
+                "Select an entry to edit:",
                 entryChoices);
 
             return selectedChoice.Entry;
@@ -232,7 +228,7 @@ public class PreferencesManagerService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in entry selection");
-            _renderer.RenderErrorMessage($"Error selecting entry: {ex.Message}");
+            _screen.Error($"Error selecting entry: {ex.Message}");
             return null;
         }
     }
@@ -242,8 +238,7 @@ public class PreferencesManagerService
         var localizedEntryName = _localizationService.GetLocalizedString(entry.Name);
         var currentValue = entry.Value ?? "";
 
-        _renderer.ClearScreen();
-        _renderer.RenderSectionHeader($"Preferences Editor - {sectionName}", 
+        _renderer.RenderSectionHeader($"Preferences Editor - {sectionName}",
             $"Editing: {localizedEntryName}");
 
         // Show current value
@@ -293,163 +288,20 @@ public class PreferencesManagerService
                 _renderer.PauseForUser();
                 return true; // Changes made
             }
-            else
-            {
-                _renderer.AddVerticalSpace(1);
-                _renderer.RenderInfoMessage("No changes made.");
-                _renderer.PauseForUser();
-                return false; // No changes made
-            }
+
+            _renderer.AddVerticalSpace(1);
+            _renderer.RenderInfoMessage("No changes made.");
+            _renderer.PauseForUser();
+            return false; // No changes made
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error editing entry value");
-            _renderer.RenderErrorMessage($"Error editing value: {ex.Message}");
-            _renderer.PauseForUser();
+            _screen.Error($"Error editing value: {ex.Message}");
             return false; // No changes made
         }
     }
 
-    // Helper classes for choices
-    private class SectionChoice
-    {
-        public PreferencesSection? Section { get; }
-        public string DisplayName { get; }
-        public SectionChoiceType ChoiceType { get; }
-
-        public SectionChoice(PreferencesSection? section, string displayName, SectionChoiceType choiceType)
-        {
-            Section = section;
-            DisplayName = displayName;
-            ChoiceType = choiceType;
-        }
-
-        public override string ToString() => DisplayName;
-    }
-
-    private enum SectionChoiceType
-    {
-        Section,
-        Cancel,
-        SaveAndExit
-    }
-
-    private class SectionSelectionResult
-    {
-        public PreferencesSection? Section { get; }
-        public SectionChoiceType ChoiceType { get; }
-
-        public SectionSelectionResult(PreferencesSection? section, SectionChoiceType choiceType)
-        {
-            Section = section;
-            ChoiceType = choiceType;
-        }
-    }
-
-    private class EntryChoice
-    {
-        public PreferencesEntry? Entry { get; }
-        public string DisplayName { get; }
-
-        public EntryChoice(PreferencesEntry? entry, string displayName)
-        {
-            Entry = entry;
-            DisplayName = displayName;
-        }
-
-        public override string ToString() => DisplayName;
-    }
-
-    private async Task DisplayPreferencesSectionsAsync(IEnumerable<PreferencesSection> sections)
-    {
-        var orderedSections = sections.OrderBy(s => s.Order).ToList();
-        var hasChanges = false;
-
-        foreach (var section in orderedSections)
-        {
-            var sectionHasChanges = await DisplayPreferencesSectionAsync(section);
-            hasChanges = hasChanges || sectionHasChanges;
-        }
-
-        _renderer.AddVerticalSpace(2);
-
-        if (hasChanges)
-        {
-            _renderer.RenderSuccessMessage("Preferences have been updated and saved to appsettings.json");
-        }
-        else
-        {
-            _renderer.RenderInfoMessage("No changes were made to preferences.");
-        }
-
-        _renderer.PauseForUser();
-    }
-
-    private async Task<bool> DisplayPreferencesSectionAsync(PreferencesSection section)
-    {
-        var localizedName = _localizationService.GetLocalizedString(section.Name);
-        var hasChanges = false;
-
-        _renderer.RenderSubHeader(localizedName);
-        _renderer.AddVerticalSpace(1);
-
-        if (section.Entries?.Any() == true)
-        {
-            // Display current values first
-            DisplaySectionTable(section);
-            _renderer.AddVerticalSpace(1);
-
-            // Ask if user wants to edit this section
-            var editSection = _renderer.PromptForConfirmation($"Do you want to edit settings in '{localizedName}'?", false);
-
-            if (editSection)
-            {
-                _renderer.AddVerticalSpace(1);
-
-                foreach (var entry in section.Entries)
-                {
-                    var entryChanged = await EditEntryAsync(entry, localizedName);
-                    hasChanges = hasChanges || entryChanged;
-                }
-
-                if (hasChanges)
-                {
-                    // Save changes to appsettings.json
-                    await SaveChangesToFileAsync();
-
-                    // Apply theme changes immediately
-                    ApplyThemeChanges();
-                }
-            }
-        }
-        else
-        {
-            _renderer.RenderInfoMessage("No entries in this section.");
-        }
-
-        _renderer.AddVerticalSpace(2);
-        return hasChanges;
-    }
-
-    private async Task AddPreferencesEntryToTableAsync(Table table, PreferencesEntry entry)
-    {
-        var localizedName = _localizationService.GetLocalizedString(entry.Name);
-        var value = entry.Value ?? "[not set]";
-        var options = entry.Options?.Any() == true 
-            ? string.Join(", ", entry.Options) 
-            : "[any value]";
-
-        // Escape square brackets to prevent markup parsing errors
-        var escapedValue = value.Replace("[", "[[").Replace("]", "]]");
-        var escapedOptions = options.Replace("[", "[[").Replace("]", "]]");
-
-        // Apply styling
-        var nameMarkup = $"[{_renderer.CurrentTheme.Primary}]{localizedName.EscapeMarkup()}[/]";
-        var valueMarkup = $"[{_renderer.CurrentTheme.Success}]{escapedValue}[/]";
-        var optionsMarkup = $"[{_renderer.CurrentTheme.Muted}]{escapedOptions}[/]";
-
-        table.AddRow(nameMarkup, valueMarkup, optionsMarkup);
-    }
 
     public PreferencesOptions? GetCurrentPreferences()
     {
@@ -458,7 +310,7 @@ public class PreferencesManagerService
 
     public PreferencesSection? GetSection(string sectionName)
     {
-        return _preferencesOptions.Value?.Sections?.FirstOrDefault(s => 
+        return _preferencesOptions.Value?.Sections?.FirstOrDefault(s =>
             string.Equals(s.Name, sectionName, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -466,47 +318,41 @@ public class PreferencesManagerService
     {
         try
         {
-            Console.WriteLine($"GetEntry called with sectionName: {sectionName}, entryName: {entryName}");
+            _logger.LogDebug("GetEntry called with sectionName: {SectionName}, entryName: {EntryName}", sectionName,
+                entryName);
 
             var preferencesValue = _preferencesOptions.Value;
-            Console.WriteLine($"PreferencesOptions.Value is null: {preferencesValue == null}");
+            _logger.LogDebug("PreferencesOptions.Value is null: {IsNull}", preferencesValue == null);
 
             if (preferencesValue?.Sections != null)
             {
-                Console.WriteLine($"Number of sections: {preferencesValue.Sections.Count()}");
+                _logger.LogDebug("Number of sections: {SectionCount}", preferencesValue.Sections.Count());
             }
 
             var section = GetSection(sectionName);
-            Console.WriteLine($"Section found: {section != null}");
+            _logger.LogDebug("Section found: {IsFound}", section != null);
 
             if (section?.Entries != null)
             {
-                Console.WriteLine($"Number of entries in section: {section.Entries.Count()}");
+                _logger.LogDebug("Number of entries in section: {EntryCount}", section.Entries.Count());
             }
 
-            var entry = section?.Entries?.FirstOrDefault(e => 
+            var entry = section?.Entries?.FirstOrDefault(e =>
                 string.Equals(e.Name, entryName, StringComparison.OrdinalIgnoreCase));
 
-            Console.WriteLine($"Entry found: {entry != null}");
+            _logger.LogDebug("Entry found: {IsFound}", entry != null);
             if (entry != null)
             {
-                Console.WriteLine($"Entry value: {entry.Value}");
+                _logger.LogDebug("Entry value: {EntryValue}", entry.Value);
             }
 
             return entry;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in GetEntry: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            _logger.LogError(ex, "Error in GetEntry");
             return null;
         }
-    }
-
-    public string? GetEntryValue(string sectionName, string entryName)
-    {
-        var entry = GetEntry(sectionName, entryName);
-        return entry?.Value;
     }
 
     private void DisplaySectionTable(PreferencesSection section)
@@ -532,8 +378,8 @@ public class PreferencesManagerService
     {
         var localizedName = _localizationService.GetLocalizedString(entry.Name);
         var value = entry.Value ?? "[[not set]]";
-        var options = entry.Options?.Any() == true 
-            ? string.Join(", ", entry.Options) 
+        var options = entry.Options?.Any() == true
+            ? string.Join(", ", entry.Options)
             : "[[any value]]";
 
         // Apply styling
@@ -544,14 +390,12 @@ public class PreferencesManagerService
         table.AddRow(nameMarkup, valueMarkup, optionsMarkup);
     }
 
-
     private async Task SaveChangesToFileAsync()
     {
         try
         {
             // Get the current preferences
             var preferences = _preferencesOptions.Value;
-            if (preferences == null) return;
 
             // Save to appsettings.json using the AppSettings helper
             var appSettingsPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
@@ -560,33 +404,71 @@ public class PreferencesManagerService
             var wrapper = new { Preferences = preferences };
 
             // Use AppSettings.Update to save changes
-            Common.SampleApp.AppSettings.Update(wrapper, "", appSettingsPath);
+            AppSettings.Update(wrapper, "", appSettingsPath);
 
-            _renderer.RenderSuccessMessage("Preferences saved to appsettings.json");
+            _screen.Success("Preferences saved to appsettings.json");
             _logger.LogInformation("Preferences saved to {AppSettingsPath}", appSettingsPath);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save preferences to file");
-            _renderer.RenderErrorMessage($"Failed to save preferences: {ex.Message}");
+            _screen.Error($"Failed to save preferences: {ex.Message}");
         }
     }
 
-    private void ApplyThemeChanges()
+    // Helper classes for choices
+    private class SectionChoice
     {
-        try
+        public SectionChoice(PreferencesSection? section, string displayName, SectionChoiceType choiceType)
         {
-            // Get the current theme setting
-            var themeEntry = GetEntry("Preferences.General", "Preferences.General.Theme");
-            if (themeEntry?.Value != null)
-            {
-                _renderer.UpdateTheme(themeEntry.Value);
-                _logger.LogDebug("Applied theme change: {Theme}", themeEntry.Value);
-            }
+            Section = section;
+            DisplayName = displayName;
+            ChoiceType = choiceType;
         }
-        catch (Exception ex)
+
+        public PreferencesSection? Section { get; }
+        public string DisplayName { get; }
+        public SectionChoiceType ChoiceType { get; }
+
+        public override string ToString()
         {
-            _logger.LogError(ex, "Failed to apply theme changes");
+            return DisplayName;
+        }
+    }
+
+    private enum SectionChoiceType
+    {
+        Section,
+        Cancel,
+        SaveAndExit
+    }
+
+    private class SectionSelectionResult
+    {
+        public SectionSelectionResult(PreferencesSection? section, SectionChoiceType choiceType)
+        {
+            Section = section;
+            ChoiceType = choiceType;
+        }
+
+        public PreferencesSection? Section { get; }
+        public SectionChoiceType ChoiceType { get; }
+    }
+
+    private class EntryChoice
+    {
+        public EntryChoice(PreferencesEntry? entry, string displayName)
+        {
+            Entry = entry;
+            DisplayName = displayName;
+        }
+
+        public PreferencesEntry? Entry { get; }
+        public string DisplayName { get; }
+
+        public override string ToString()
+        {
+            return DisplayName;
         }
     }
 }

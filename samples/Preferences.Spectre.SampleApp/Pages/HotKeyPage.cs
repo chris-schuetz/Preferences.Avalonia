@@ -19,62 +19,57 @@
 // SOFTWARE.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Preferences.Common;
-using Preferences.Common.SampleApp.Services;
+using Preferences.Spectre.SampleApp.Rendering;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
-namespace Preferences.Spectre.SampleApp.Services;
+namespace Preferences.Spectre.SampleApp.Pages;
 
-public class HotKeyService
+public class HotKeyPage : IPage
 {
-    private readonly ILogger<HotKeyService> _logger;
-    private readonly ConsoleRenderer _renderer;
-    private readonly PreferencesManagerService _preferencesManager;
     private readonly ILocalizationService _localizationService;
+    private readonly ILogger<HotKeyPage> _logger;
+    private readonly IOptionsMonitor<PreferencesOptions> _options;
 
-    public HotKeyService(
-        ILogger<HotKeyService> logger,
-        ConsoleRenderer renderer,
-        PreferencesManagerService preferencesManager,
+    public HotKeyPage(
+        ILogger<HotKeyPage> logger,
+        IOptionsMonitor<PreferencesOptions> options,
         ILocalizationService localizationService)
     {
         _logger = logger;
-        _renderer = renderer;
-        _preferencesManager = preferencesManager;
+        _options = options;
         _localizationService = localizationService;
     }
 
-    public async Task ShowHotKeysAsync()
+    public IRenderable? Draw(ScreenLayout screenLayout, IScreen screen)
     {
         try
         {
             _logger.LogDebug("Showing hot keys");
 
-            _renderer.ClearScreen();
-            _renderer.RenderSectionHeader("Keyboard Shortcuts", "Available hot keys and shortcuts");
-
-            // Get all preferences from PreferencesOptions
-            var preferences = _preferencesManager.GetCurrentPreferences();
+            var preferences = _options.CurrentValue;
             if (preferences?.Sections == null)
             {
-                _renderer.RenderWarningMessage("No preferences configuration found");
-                _renderer.PauseForUser();
-                return;
+                screen.Warning("No preferences configuration found");
+                return null;
             }
 
             // Find all sections that contain hotkey entries
             var hotKeySections = preferences.Sections
                 .Where(section => section.Name.Contains("HotKey", StringComparison.OrdinalIgnoreCase) ||
-                                 section.Entries.Any(entry => entry.Name.Contains("HotKey", StringComparison.OrdinalIgnoreCase)))
+                                  section.Entries.Any(entry =>
+                                      entry.Name.Contains("HotKey", StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
             if (!hotKeySections.Any())
             {
-                _renderer.RenderWarningMessage("No hotkey configuration found in preferences");
-                _renderer.PauseForUser();
-                return;
+                screen.Warning("No hotkey configuration found in preferences");
+                return null;
             }
 
+            _renderer.RenderSectionHeader("Keyboard Shortcuts", "Available hot keys and shortcuts");
             _renderer.AddVerticalSpace(1);
             _renderer.RenderInfoMessage("Application shortcuts:");
             _renderer.AddVerticalSpace(1);
@@ -111,8 +106,7 @@ public class HotKeyService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error showing hot keys");
-            _renderer.RenderErrorMessage($"Failed to show hot keys: {ex.Message}");
-            _renderer.PauseForUser();
+            screen.Error($"Failed to show hot keys: {ex.Message}");
         }
     }
 }

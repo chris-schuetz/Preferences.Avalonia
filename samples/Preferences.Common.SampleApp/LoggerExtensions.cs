@@ -18,22 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Preferences.Common;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
-/// <summary>
-///     Interface for providing localized strings to the Preferences.Avalonia library
-/// </summary>
-public interface ILocalizationService
+namespace Preferences.Common.SampleApp;
+
+public static class LoggerExtensions
 {
-    /// <summary>
-    ///     Gets a localized string for the specified resource key
-    /// </summary>
-    /// <param name="resourceKey">The resource key to look up</param>
-    /// <returns>The localized string or the key itself if no translation was found</returns>
-    string GetLocalizedString(string resourceKey);
+    public static void LogEntry(this ILogger logger, [CallerMemberName] string callerName = "")
+    {
+        logger.LogTrace("Entering {CallerName}", callerName);
+    }
 
-    /// <summary>
-    ///     Event that is triggered when the locale changes
-    /// </summary>
-    event EventHandler LocaleChanged;
+    public static void LogExit(this ILogger logger, [CallerMemberName] string callerName = "")
+    {
+        logger.LogDebug("Exiting {CallerName}", callerName);
+    }
 }
